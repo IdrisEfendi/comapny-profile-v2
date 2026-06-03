@@ -73,6 +73,7 @@
             @endif
 
             <form class="mt-8 space-y-5" action="{{ url('kontak') }}" method="post">
+                @php echo csrf_field(); @endphp
                 <div>
                     <label class="block text-sm font-semibold text-slate-700" for="name">Nama</label>
                     <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="name" name="name" type="text" placeholder="Nama lengkap" required>

@@ -35,8 +35,8 @@
         <div class="mt-10 grid gap-8 lg:grid-cols-2">
             @foreach ($products as $product)
                 @php
-                    $detailUrl = $product['slug'] === 'tahara' ? url('produk/tahara') : url('kontak');
-                    $initial = strtoupper(substr($product['name'], 0, 1));
+                    $detailUrl = url('produk/'.$product['slug']);
+                    $initial = public_product_initial($product);
                 @endphp
                 <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
                     <div class="bg-gradient-to-br from-blue-900 to-blue-700 p-8 text-white">
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <div class="border-t border-slate-200 px-8 py-6">
-                        <a href="{{ $detailUrl }}" class="inline-flex items-center justify-center rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-blue-950">{{ $product['slug'] === 'tahara' ? 'Lihat Detail TAHARA' : 'Hubungi Kami' }}</a>
+                        <a href="{{ $detailUrl }}" class="inline-flex items-center justify-center rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-blue-950">Lihat Detail {{ $product['name'] }}</a>
                     </div>
                 </article>
             @endforeach

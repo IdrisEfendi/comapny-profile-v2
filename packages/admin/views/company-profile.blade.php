@@ -6,6 +6,7 @@
 @endif
 
 <form action="{{ url('admin/company-profile') }}" method="post" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+    @php echo csrf_field(); @endphp
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Profil Perusahaan</p>

@@ -10,6 +10,7 @@
 @endif
 
 <form action="{{ url('admin/account') }}" method="post" class="max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+    @php echo csrf_field(); @endphp
     <div>
         <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Keamanan Admin</p>
         <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">Kelola akun login</h2>

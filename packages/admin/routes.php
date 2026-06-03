@@ -16,6 +16,21 @@ function admin_require_auth()
     return null;
 }
 
+function admin_post_value($key, $default = null)
+{
+    return array_key_exists($key, $_POST) ? $_POST[$key] : \System\Input::get($key, $default);
+}
+
+function admin_require_csrf($redirect = 'admin/dashboard')
+{
+    if (! csrf_check((string) admin_post_value('_token'))) {
+        \System\Session::flash('admin_error', 'Sesi form tidak valid. Silakan muat ulang halaman dan coba lagi.');
+        return redirect($redirect);
+    }
+
+    return null;
+}
+
 function admin_find_user_by_username($username)
 {
     return \System\Database::connection()->first('SELECT * FROM admin_users WHERE username = ? AND is_active = 1 LIMIT 1', [$username]);
@@ -57,9 +72,69 @@ function admin_update_current_user($username, $name, $password = null)
     \System\Session::put('admin_username', $username);
 }
 
-function admin_get_contact_messages()
+function admin_contact_messages_url(array $params = [])
 {
-    return \System\Database::connection()->query('SELECT * FROM contact_messages ORDER BY created_at DESC, id DESC');
+    $query = array_filter($params, function ($value) {
+        return $value !== null && $value !== '';
+    });
+
+    return url('admin/contact-messages').(count($query) ? '?'.http_build_query($query) : '');
+}
+
+function admin_contact_message_filters()
+{
+    $q = text_limit(\System\Input::get('q'), 120);
+    $status = text_limit(\System\Input::get('status'), 20);
+    $allowedStatuses = ['all', 'unread', 'read'];
+
+    if (! in_array($status, $allowedStatuses, true)) {
+        $status = 'all';
+    }
+
+    $page = max(1, (int) \System\Input::get('page', 1));
+    $perPage = 10;
+
+    return compact('q', 'status', 'page', 'perPage');
+}
+
+function admin_contact_messages_where(array $filters, array &$bindings)
+{
+    $where = [];
+
+    if ($filters['status'] === 'unread') {
+        $where[] = 'is_read = 0';
+    } elseif ($filters['status'] === 'read') {
+        $where[] = 'is_read = 1';
+    }
+
+    if ($filters['q'] !== '') {
+        $where[] = '(name LIKE ? OR contact LIKE ? OR subject LIKE ? OR message LIKE ?)';
+        $keyword = '%'.$filters['q'].'%';
+        $bindings[] = $keyword;
+        $bindings[] = $keyword;
+        $bindings[] = $keyword;
+        $bindings[] = $keyword;
+    }
+
+    return count($where) ? ' WHERE '.implode(' AND ', $where) : '';
+}
+
+function admin_get_contact_messages(array $filters)
+{
+    $bindings = [];
+    $where = admin_contact_messages_where($filters, $bindings);
+    $offset = max(0, ($filters['page'] - 1) * $filters['perPage']);
+    $sql = 'SELECT * FROM contact_messages'.$where.' ORDER BY created_at DESC, id DESC LIMIT '.(int) $filters['perPage'].' OFFSET '.(int) $offset;
+
+    return \System\Database::connection()->query($sql, $bindings);
+}
+
+function admin_count_contact_messages(array $filters)
+{
+    $bindings = [];
+    $where = admin_contact_messages_where($filters, $bindings);
+
+    return (int) \System\Database::connection()->only('SELECT COUNT(*) FROM contact_messages'.$where, $bindings);
 }
 
 function admin_count_unread_contact_messages()
@@ -174,16 +249,16 @@ function admin_product_slug($name, $fallback = 'produk')
 function admin_default_management()
 {
     return [
-        ['id' => null, 'name' => 'Heri Heryanto SH, MM', 'position' => 'Direktur Utama', 'group' => 'Direksi', 'initials' => 'HH', 'bio' => 'Memimpin arah operasional dan pengelolaan perusahaan sesuai peran direktur utama dalam struktur organisasi.'],
-        ['id' => null, 'name' => 'Atjeng Hadis Susanto SE', 'position' => 'Direktur', 'group' => 'Direksi', 'initials' => 'AH', 'bio' => 'Mendukung pengelolaan dan pelaksanaan operasional perusahaan sesuai peran direktur dalam struktur organisasi.'],
-        ['id' => null, 'name' => 'Jaja Sumarna SE', 'position' => 'Komisaris Utama', 'group' => 'Komisaris', 'initials' => 'JS', 'bio' => 'Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).'],
-        ['id' => null, 'name' => 'Dikdik Kustiadi', 'position' => 'Komisaris', 'group' => 'Komisaris', 'initials' => 'DK', 'bio' => 'Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).'],
+        ['id' => null, 'name' => 'Heri Heryanto SH, MM', 'position' => 'Direktur Utama', 'group' => 'Direksi', 'initials' => 'HH', 'bio' => 'Memimpin arah operasional dan pengelolaan perusahaan sesuai peran direktur utama dalam struktur organisasi.', 'photo_path' => ''],
+        ['id' => null, 'name' => 'Atjeng Hadis Susanto SE', 'position' => 'Direktur', 'group' => 'Direksi', 'initials' => 'AH', 'bio' => 'Mendukung pengelolaan dan pelaksanaan operasional perusahaan sesuai peran direktur dalam struktur organisasi.', 'photo_path' => ''],
+        ['id' => null, 'name' => 'Jaja Sumarna SE', 'position' => 'Komisaris Utama', 'group' => 'Komisaris', 'initials' => 'JS', 'bio' => 'Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).', 'photo_path' => ''],
+        ['id' => null, 'name' => 'Dikdik Kustiadi', 'position' => 'Komisaris', 'group' => 'Komisaris', 'initials' => 'DK', 'bio' => 'Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).', 'photo_path' => ''],
     ];
 }
 
 function admin_get_management()
 {
-    $rows = \System\Database::connection()->query('SELECT id, name, position, group_name, initials, bio FROM management ORDER BY sort_order ASC, id ASC');
+    $rows = \System\Database::connection()->query('SELECT id, name, position, group_name, initials, bio, photo_path FROM management ORDER BY sort_order ASC, id ASC');
     $management = [];
 
     foreach ($rows as $row) {
@@ -194,6 +269,7 @@ function admin_get_management()
             'group' => $row->group_name,
             'initials' => $row->initials,
             'bio' => $row->bio,
+            'photo_path' => $row->photo_path,
         ];
     }
 
@@ -216,6 +292,67 @@ function admin_person_initials($name)
     }
 
     return $initials !== '' ? $initials : 'PG';
+}
+
+function admin_management_upload_dir()
+{
+    return path('assets').'uploads'.DS.'management';
+}
+
+function admin_store_management_photo($key = 'photo')
+{
+    if (empty($_FILES[$key]) || empty($_FILES[$key]['tmp_name'])) {
+        return null;
+    }
+
+    if (! is_uploaded_file($_FILES[$key]['tmp_name'])) {
+        return null;
+    }
+
+    if ((int) $_FILES[$key]['size'] > 2 * 1024 * 1024) {
+        throw new \Exception('Ukuran foto maksimal 2MB.');
+    }
+
+    $info = getimagesize($_FILES[$key]['tmp_name']);
+    $allowed = [
+        IMAGETYPE_JPEG => 'jpg',
+        IMAGETYPE_PNG => 'png',
+        IMAGETYPE_WEBP => 'webp',
+    ];
+
+    if (! $info || ! isset($allowed[$info[2]])) {
+        throw new \Exception('Format foto harus JPG, PNG, atau WEBP.');
+    }
+
+    $dir = admin_management_upload_dir();
+
+    if (! is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+
+    $filename = 'pengurus-'.date('YmdHis').'-'.bin2hex(random_bytes(4)).'.'.$allowed[$info[2]];
+    $target = $dir.DS.$filename;
+
+    if (! move_uploaded_file($_FILES[$key]['tmp_name'], $target)) {
+        throw new \Exception('Foto gagal diunggah. Periksa permission folder upload.');
+    }
+
+    return 'uploads/management/'.$filename;
+}
+
+function admin_delete_management_photo($path)
+{
+    $path = trim((string) $path);
+
+    if ($path === '' || strpos($path, 'uploads/management/') !== 0) {
+        return;
+    }
+
+    $fullPath = path('assets').str_replace('/', DS, $path);
+
+    if (is_file($fullPath)) {
+        @unlink($fullPath);
+    }
 }
 
 function admin_default_company_profile()
@@ -257,7 +394,12 @@ Route::get('(:package)/login', function () {
 });
 
 Route::post('(:package)/login', function () {
-    $username = trim((string) \System\Input::get('username'));
+    if (! csrf_check((string) \System\Input::get('_token'))) {
+        \System\Session::flash('admin_login_error', 'Sesi form tidak valid. Silakan muat ulang halaman dan coba lagi.');
+        return redirect('admin/login');
+    }
+
+    $username = text_limit(\System\Input::get('username'), 100);
     $password = (string) \System\Input::get('password');
     $user = admin_find_user_by_username($username);
 
@@ -314,9 +456,13 @@ Route::post('(:package)/account', function () {
         return $redirect;
     }
 
+    if ($redirect = admin_require_csrf('admin/account')) {
+        return $redirect;
+    }
+
     $user = admin_current_user();
-    $username = trim((string) \System\Input::get('username'));
-    $name = trim((string) \System\Input::get('name'));
+    $username = text_limit(\System\Input::get('username'), 100);
+    $name = text_limit(\System\Input::get('name'), 190);
     $currentPassword = (string) \System\Input::get('current_password');
     $newPassword = (string) \System\Input::get('new_password');
     $confirmPassword = (string) \System\Input::get('confirm_password');
@@ -352,12 +498,24 @@ Route::get('(:package)/contact-messages', function () {
         return $redirect;
     }
 
+    $filters = admin_contact_message_filters();
+    $total = admin_count_contact_messages($filters);
+    $totalPages = max(1, (int) ceil($total / $filters['perPage']));
+
+    if ($filters['page'] > $totalPages) {
+        $filters['page'] = $totalPages;
+    }
+
     return view('admin::contact-messages', [
         'title' => 'Pesan Kontak',
         'active' => 'messages',
-        'messages' => admin_get_contact_messages(),
+        'messages' => admin_get_contact_messages($filters),
+        'filters' => $filters,
+        'total' => $total,
+        'totalPages' => $totalPages,
         'unreadCount' => admin_count_unread_contact_messages(),
         'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
     ]);
 });
 
@@ -366,8 +524,6 @@ Route::get('(:package)/contact-messages/(:num)', function ($id) {
         return $redirect;
     }
 
-    \System\Database::connection()->query('UPDATE contact_messages SET is_read = 1, updated_at = ? WHERE id = ?', [date('Y-m-d H:i:s'), (int) $id]);
-
     return view('admin::contact-message-detail', [
         'title' => 'Detail Pesan Kontak',
         'active' => 'messages',
@@ -375,16 +531,37 @@ Route::get('(:package)/contact-messages/(:num)', function ($id) {
     ]);
 });
 
+Route::post('(:package)/contact-messages/status', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    if ($redirect = admin_require_csrf('admin/contact-messages')) {
+        return $redirect;
+    }
+
+    $id = (int) admin_post_value('id');
+    $status = admin_post_value('status') === 'read' ? 1 : 0;
+    \System\Database::connection()->query('UPDATE contact_messages SET is_read = ?, updated_at = ? WHERE id = ?', [$status, date('Y-m-d H:i:s'), $id]);
+    \System\Session::flash('admin_success', $status ? 'Pesan ditandai sudah dibaca.' : 'Pesan ditandai belum dibaca.');
+
+    return redirect(admin_post_value('back', 'admin/contact-messages'));
+});
+
 Route::post('(:package)/contact-messages/delete', function () {
     if ($redirect = admin_require_auth()) {
         return $redirect;
     }
 
-    $id = (int) \System\Input::get('id');
+    if ($redirect = admin_require_csrf('admin/contact-messages')) {
+        return $redirect;
+    }
+
+    $id = (int) admin_post_value('id');
     \System\Database::connection()->query('DELETE FROM contact_messages WHERE id = ?', [$id]);
     \System\Session::flash('admin_success', 'Pesan kontak berhasil dihapus.');
 
-    return redirect('admin/contact-messages');
+    return redirect(admin_post_value('back', 'admin/contact-messages'));
 });
 
 Route::get('(:package)/settings', function () {
@@ -405,10 +582,14 @@ Route::post('(:package)/settings', function () {
         return $redirect;
     }
 
+    if ($redirect = admin_require_csrf('admin/settings')) {
+        return $redirect;
+    }
+
     $settings = [];
 
     foreach (array_keys(admin_default_settings()) as $key) {
-        $settings[$key] = trim((string) \System\Input::get($key));
+        $settings[$key] = text_limit(\System\Input::get($key), $key === 'address' ? 1000 : 190);
     }
 
     admin_save_settings($settings);
@@ -435,10 +616,14 @@ Route::post('(:package)/company-profile', function () {
         return $redirect;
     }
 
+    if ($redirect = admin_require_csrf('admin/company-profile')) {
+        return $redirect;
+    }
+
     $profile = [];
 
     foreach (array_keys(admin_default_company_profile()) as $key) {
-        $profile[$key] = trim((string) \System\Input::get($key));
+        $profile[$key] = text_limit(\System\Input::get($key), 5000);
     }
 
     admin_save_company_profile($profile);
@@ -465,10 +650,14 @@ Route::post('(:package)/products', function () {
         return $redirect;
     }
 
+    if ($redirect = admin_require_csrf('admin/products')) {
+        return $redirect;
+    }
+
     $conn = \System\Database::connection();
     $now = date('Y-m-d H:i:s');
-    $originalSlug = trim((string) \System\Input::get('original_slug'));
-    $name = trim((string) \System\Input::get('name'));
+    $originalSlug = text_limit(\System\Input::get('original_slug'), 160);
+    $name = text_limit(\System\Input::get('name'), 190);
     $slug = admin_product_slug(\System\Input::get('slug'), $name);
     $isFeatured = (bool) \System\Input::get('is_featured');
 
@@ -479,11 +668,11 @@ Route::post('(:package)/products', function () {
     $values = [
         $slug,
         $name !== '' ? $name : strtoupper($slug),
-        trim((string) \System\Input::get('category')),
-        trim((string) \System\Input::get('subtitle')),
-        trim((string) \System\Input::get('summary')),
-        trim((string) \System\Input::get('target')),
-        trim((string) \System\Input::get('detail_label')),
+        text_limit(\System\Input::get('category'), 120),
+        text_limit(\System\Input::get('subtitle'), 190),
+        text_limit(\System\Input::get('summary'), 5000),
+        text_limit(\System\Input::get('target'), 190),
+        text_limit(\System\Input::get('detail_label'), 190),
         $isFeatured ? 1 : 0,
         $now,
     ];
@@ -505,7 +694,11 @@ Route::post('(:package)/products/delete', function () {
         return $redirect;
     }
 
-    $slug = trim((string) \System\Input::get('slug'));
+    if ($redirect = admin_require_csrf('admin/products')) {
+        return $redirect;
+    }
+
+    $slug = text_limit(\System\Input::get('slug'), 160);
     \System\Database::connection()->query('DELETE FROM products WHERE slug = ?', [$slug]);
     \System\Session::flash('admin_success', 'Produk berhasil dihapus.');
 
@@ -522,6 +715,7 @@ Route::get('(:package)/management', function () {
         'active' => 'management',
         'management' => admin_get_management(),
         'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
     ]);
 });
 
@@ -530,25 +724,57 @@ Route::post('(:package)/management', function () {
         return $redirect;
     }
 
+    if ($redirect = admin_require_csrf('admin/management')) {
+        return $redirect;
+    }
+
     $conn = \System\Database::connection();
     $now = date('Y-m-d H:i:s');
-    $originalId = (int) \System\Input::get('original_id');
-    $name = trim((string) \System\Input::get('name'));
-    $initials = trim((string) \System\Input::get('initials'));
+    $originalId = (int) admin_post_value('original_id');
+    $name = text_limit(admin_post_value('name'), 190);
+    $position = text_limit(admin_post_value('position'), 190);
+    $group = text_limit(admin_post_value('group'), 80);
+    $initials = text_limit(admin_post_value('initials'), 10);
+
+    if ($name === '' || $position === '' || $group === '') {
+        \System\Session::flash('admin_error', 'Nama, jabatan, dan kelompok pengurus wajib diisi.');
+        return redirect('admin/management');
+    }
+    $existing = $originalId > 0 ? $conn->first('SELECT * FROM management WHERE id = ? LIMIT 1', [$originalId]) : null;
+    $photoPath = $existing ? (string) $existing->photo_path : '';
+
+    if ((bool) admin_post_value('remove_photo')) {
+        admin_delete_management_photo($photoPath);
+        $photoPath = '';
+    }
+
+    try {
+        $uploadedPhoto = admin_store_management_photo('photo');
+
+        if ($uploadedPhoto) {
+            admin_delete_management_photo($photoPath);
+            $photoPath = $uploadedPhoto;
+        }
+    } catch (\Exception $e) {
+        \System\Session::flash('admin_error', $e->getMessage());
+        return redirect('admin/management');
+    }
+
     $person = [
         $name,
-        trim((string) \System\Input::get('position')),
-        trim((string) \System\Input::get('group')),
+        $position,
+        $group,
         $initials !== '' ? strtoupper($initials) : admin_person_initials($name),
-        trim((string) \System\Input::get('bio')),
+        text_limit(admin_post_value('bio'), 5000),
+        $photoPath,
         $now,
     ];
 
-    if ($originalId > 0 && (int) $conn->only('SELECT COUNT(*) FROM management WHERE id = ?', [$originalId]) > 0) {
-        $conn->query('UPDATE management SET name = ?, position = ?, group_name = ?, initials = ?, bio = ?, updated_at = ? WHERE id = ?', array_merge($person, [$originalId]));
+    if ($existing) {
+        $conn->query('UPDATE management SET name = ?, position = ?, group_name = ?, initials = ?, bio = ?, photo_path = ?, updated_at = ? WHERE id = ?', array_merge($person, [$originalId]));
     } else {
         $sortOrder = (int) $conn->only('SELECT COALESCE(MAX(sort_order), -1) + 1 FROM management');
-        $conn->query('INSERT INTO management (name, position, group_name, initials, bio, updated_at, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', array_merge($person, [$sortOrder, $now]));
+        $conn->query('INSERT INTO management (name, position, group_name, initials, bio, photo_path, updated_at, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', array_merge($person, [$sortOrder, $now]));
     }
 
     \System\Session::flash('admin_success', 'Data pengurus berhasil disimpan.');
@@ -561,7 +787,17 @@ Route::post('(:package)/management/delete', function () {
         return $redirect;
     }
 
+    if ($redirect = admin_require_csrf('admin/management')) {
+        return $redirect;
+    }
+
     $id = (int) \System\Input::get('id');
+    $person = \System\Database::connection()->first('SELECT photo_path FROM management WHERE id = ? LIMIT 1', [$id]);
+
+    if ($person) {
+        admin_delete_management_photo($person->photo_path);
+    }
+
     \System\Database::connection()->query('DELETE FROM management WHERE id = ?', [$id]);
     \System\Session::flash('admin_success', 'Data pengurus berhasil dihapus.');
 

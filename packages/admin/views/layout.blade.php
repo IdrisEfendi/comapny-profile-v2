@@ -25,13 +25,21 @@
                     $active = isset($active) ? $active : '';
                     $base = 'block rounded-2xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white';
                     $on = 'bg-white text-slate-950 hover:bg-white hover:text-slate-950';
+                    $navUnreadCount = admin_is_logged_in() ? admin_count_unread_contact_messages() : 0;
                 @endphp
                 <a href="{{ url('admin/dashboard') }}" class="{{ $base }} {{ $active === 'dashboard' ? $on : '' }}">Dashboard</a>
                 <a href="{{ url('admin/settings') }}" class="{{ $base }} {{ $active === 'settings' ? $on : '' }}">Pengaturan</a>
                 <a href="{{ url('admin/company-profile') }}" class="{{ $base }} {{ $active === 'company' ? $on : '' }}">Profil Perusahaan</a>
                 <a href="{{ url('admin/products') }}" class="{{ $base }} {{ $active === 'products' ? $on : '' }}">Produk</a>
                 <a href="{{ url('admin/management') }}" class="{{ $base }} {{ $active === 'management' ? $on : '' }}">Pengurus</a>
-                <a href="{{ url('admin/contact-messages') }}" class="{{ $base }} {{ $active === 'messages' ? $on : '' }}">Pesan Kontak</a>
+                <a href="{{ url('admin/contact-messages') }}" class="{{ $base }} {{ $active === 'messages' ? $on : '' }}">
+                    <span class="flex items-center justify-between gap-3">
+                        <span>Pesan Kontak</span>
+                        @if ($navUnreadCount > 0)
+                            <span class="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-bold text-slate-950">{{ $navUnreadCount }}</span>
+                        @endif
+                    </span>
+                </a>
                 <a href="{{ url('admin/account') }}" class="{{ $base }} {{ $active === 'account' ? $on : '' }}">Akun Admin</a>
                 <a href="{{ url('admin/logout') }}" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-red-200 hover:bg-red-500/20 hover:text-white">Logout</a>
             </nav>

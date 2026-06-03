@@ -20,6 +20,7 @@
             @endif
 
             <form action="{{ url('admin/login') }}" method="post" class="mt-8 space-y-5">
+                @php echo csrf_field(); @endphp
                 <div>
                     <label class="block text-sm font-semibold text-slate-700" for="username">Username</label>
                     <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="username" name="username" type="text" autocomplete="username" required>

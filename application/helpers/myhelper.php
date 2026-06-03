@@ -1,5 +1,42 @@
 <?php
 
+if (! function_exists('csrf_token')) {
+    function csrf_token()
+    {
+        $token = \System\Session::get('_csrf_token');
+
+        if (! $token) {
+            $token = bin2hex(random_bytes(32));
+            \System\Session::put('_csrf_token', $token);
+        }
+
+        return $token;
+    }
+}
+
+if (! function_exists('csrf_field')) {
+    function csrf_field()
+    {
+        return '<input type="hidden" name="_token" value="'.htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8').'">';
+    }
+}
+
+if (! function_exists('csrf_check')) {
+    function csrf_check($token)
+    {
+        $sessionToken = \System\Session::get('_csrf_token');
+
+        return is_string($sessionToken) && is_string($token) && hash_equals($sessionToken, $token);
+    }
+}
+
+if (! function_exists('text_limit')) {
+    function text_limit($value, $max)
+    {
+        return mb_substr(trim((string) $value), 0, $max);
+    }
+}
+
 if (! function_exists('public_default_settings')) {
     /**
      * Default data website public. Disamakan dengan default admin agar public tetap aman
@@ -165,6 +202,28 @@ if (! function_exists('public_featured_product')) {
     }
 }
 
+if (! function_exists('public_product_by_slug')) {
+    function public_product_by_slug($slug)
+    {
+        $slug = trim((string) $slug);
+
+        foreach (public_products() as $product) {
+            if (isset($product['slug']) && $product['slug'] === $slug) {
+                return $product;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('public_product_initial')) {
+    function public_product_initial(array $product)
+    {
+        return strtoupper(substr($product['name'] ?? 'P', 0, 1));
+    }
+}
+
 if (! function_exists('public_default_management')) {
     function public_default_management()
     {
@@ -175,6 +234,7 @@ if (! function_exists('public_default_management')) {
                 'group' => 'Direksi',
                 'initials' => 'HH',
                 'bio' => 'Memimpin arah operasional dan pengelolaan perusahaan sesuai peran direktur utama dalam struktur organisasi.',
+                'photo_path' => '',
             ],
             [
                 'name' => 'Atjeng Hadis Susanto SE',
@@ -182,6 +242,7 @@ if (! function_exists('public_default_management')) {
                 'group' => 'Direksi',
                 'initials' => 'AH',
                 'bio' => 'Mendukung pengelolaan dan pelaksanaan operasional perusahaan sesuai peran direktur dalam struktur organisasi.',
+                'photo_path' => '',
             ],
             [
                 'name' => 'Jaja Sumarna SE',
@@ -189,6 +250,7 @@ if (! function_exists('public_default_management')) {
                 'group' => 'Komisaris',
                 'initials' => 'JS',
                 'bio' => 'Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).',
+                'photo_path' => '',
             ],
             [
                 'name' => 'Dikdik Kustiadi',
@@ -196,6 +258,7 @@ if (! function_exists('public_default_management')) {
                 'group' => 'Komisaris',
                 'initials' => 'DK',
                 'bio' => 'Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).',
+                'photo_path' => '',
             ],
         ];
     }
@@ -211,7 +274,7 @@ if (! function_exists('public_management')) {
         }
 
         try {
-            $rows = \System\Database::connection()->query('SELECT id, name, position, group_name, initials, bio FROM management ORDER BY sort_order ASC, id ASC');
+            $rows = \System\Database::connection()->query('SELECT id, name, position, group_name, initials, bio, photo_path FROM management ORDER BY sort_order ASC, id ASC');
             $management = [];
 
             foreach ($rows as $row) {
@@ -222,6 +285,7 @@ if (! function_exists('public_management')) {
                     'group' => $row->group_name,
                     'initials' => $row->initials,
                     'bio' => $row->bio,
+                    'photo_path' => $row->photo_path,
                 ];
             }
 

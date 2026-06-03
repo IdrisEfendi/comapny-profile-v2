@@ -36,7 +36,11 @@
             @foreach ($directors as $index => $person)
                 <article class="rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
                     <div class="{{ $index % 2 === 0 ? 'bg-gradient-to-br from-blue-900 to-blue-700' : 'bg-gradient-to-br from-slate-900 to-blue-800' }} p-8 text-white">
-                        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-800">{{ $person['initials'] }}</div>
+                        @if (! empty($person['photo_path']))
+                            <img src="{{ asset($person['photo_path']) }}" alt="Foto {{ $person['name'] }}" class="h-24 w-24 rounded-full border-4 border-white/30 object-cover shadow-lg">
+                        @else
+                            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-800">{{ $person['initials'] }}</div>
+                        @endif
                         <h3 class="mt-6 text-2xl font-bold">{{ $person['name'] }}</h3>
                         <p class="mt-2 text-blue-100">{{ $person['position'] }}</p>
                     </div>
@@ -65,7 +69,11 @@
             @foreach ($commissioners as $person)
                 <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                     <div class="flex items-start gap-5">
-                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">{{ $person['initials'] }}</div>
+                        @if (! empty($person['photo_path']))
+                            <img src="{{ asset($person['photo_path']) }}" alt="Foto {{ $person['name'] }}" class="h-20 w-20 shrink-0 rounded-full object-cover shadow-md">
+                        @else
+                            <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">{{ $person['initials'] }}</div>
+                        @endif
                         <div>
                             <h3 class="text-xl font-bold text-slate-950">{{ $person['name'] }}</h3>
                             <p class="mt-1 text-sm font-semibold text-blue-700">{{ $person['position'] }}</p>

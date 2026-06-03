@@ -6,6 +6,7 @@
 @endif
 
 <form action="{{ url('admin/settings') }}" method="post" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+    @php echo csrf_field(); @endphp
     <div class="grid gap-6 lg:grid-cols-2">
         <div>
             <label class="block text-sm font-semibold text-slate-700" for="company_name">Nama Perusahaan</label>
