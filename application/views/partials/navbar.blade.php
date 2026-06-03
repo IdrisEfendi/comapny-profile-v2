@@ -1,5 +1,6 @@
 @php
     $active = isset($active) ? $active : '';
+    $settings = isset($siteSettings) ? $siteSettings : public_settings();
     $desktopBase = 'rounded-full px-3 py-2 transition hover:bg-white/10 hover:text-amber-300';
     $desktopActive = 'bg-white text-blue-900 hover:bg-white hover:text-blue-900';
     $mobileBase = 'block rounded-2xl px-4 py-3 text-sm font-semibold text-blue-50 transition hover:bg-white/10 hover:text-amber-300';
@@ -9,10 +10,10 @@
 <header class="sticky top-0 z-50 shadow-lg shadow-slate-900/10">
     <div class="bg-slate-950 text-white">
         <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <p class="text-blue-100">Senin - Jumat, 08:00 - 14:00</p>
+            <p class="text-blue-100">{{ $settings['office_hours'] }}</p>
             <p class="flex flex-wrap gap-x-4 gap-y-1 text-slate-300">
-                <span>Telp: (0264) 8380203</span>
-                <span class="hidden sm:inline">Email: ptbptkarawang@gmail.com</span>
+                <span>Telp: {{ $settings['phone'] }}</span>
+                <span class="hidden sm:inline">Email: {{ $settings['email'] }}</span>
             </p>
         </div>
     </div>
@@ -23,8 +24,8 @@
                 <a href="{{ url('/') }}" class="flex min-w-0 items-center gap-3">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-bold text-blue-800 shadow-lg shadow-slate-900/10">BPR</span>
                     <span class="min-w-0">
-                        <span class="block truncate text-sm font-bold leading-tight text-white sm:text-base">BPR Karawang Jabar</span>
-                        <span class="block text-xs text-blue-100">Perseroda</span>
+                        <span class="block truncate text-sm font-bold leading-tight text-white sm:text-base">{{ $settings['company_name'] }}</span>
+                        <span class="block text-xs text-blue-100">{{ $settings['tagline'] }}</span>
                     </span>
                 </a>
 

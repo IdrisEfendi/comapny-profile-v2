@@ -31,6 +31,8 @@
                 <a href="{{ url('admin/company-profile') }}" class="{{ $base }} {{ $active === 'company' ? $on : '' }}">Profil Perusahaan</a>
                 <a href="{{ url('admin/products') }}" class="{{ $base }} {{ $active === 'products' ? $on : '' }}">Produk</a>
                 <a href="{{ url('admin/management') }}" class="{{ $base }} {{ $active === 'management' ? $on : '' }}">Pengurus</a>
+                <a href="{{ url('admin/contact-messages') }}" class="{{ $base }} {{ $active === 'messages' ? $on : '' }}">Pesan Kontak</a>
+                <a href="{{ url('admin/account') }}" class="{{ $base }} {{ $active === 'account' ? $on : '' }}">Akun Admin</a>
                 <a href="{{ url('admin/logout') }}" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-red-200 hover:bg-red-500/20 hover:text-white">Logout</a>
             </nav>
         </aside>

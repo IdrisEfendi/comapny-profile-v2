@@ -1,5 +1,10 @@
 @layout('layouts.app')
 
+@php
+    $directors = public_management_by_group('Direksi');
+    $commissioners = public_management_by_group('Komisaris');
+@endphp
+
 @section('content')
 <section class="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-slate-950 py-20 text-white sm:py-24">
     <div class="absolute inset-0 bg-blue-900/20"></div>
@@ -7,13 +12,13 @@
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Pengurus</p>
             <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">Direksi dan Komisaris PT BPR Karawang Jabar</h1>
-            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Informasi pengurus ditampilkan untuk mendukung transparansi profil PT BPR Karawang Jabar (Perseroda).</p>
+            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Informasi pengurus ditampilkan dari data admin untuk mendukung transparansi profil PT BPR Karawang Jabar (Perseroda).</p>
         </div>
         <div class="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
             <p class="text-sm font-semibold text-blue-100">Komposisi Pengurus</p>
             <div class="mt-5 grid grid-cols-2 gap-4">
-                <div class="rounded-2xl bg-white/10 p-4"><p class="text-3xl font-bold">2</p><p class="text-sm text-slate-300">Direksi</p></div>
-                <div class="rounded-2xl bg-white/10 p-4"><p class="text-3xl font-bold">2</p><p class="text-sm text-slate-300">Komisaris</p></div>
+                <div class="rounded-2xl bg-white/10 p-4"><p class="text-3xl font-bold">{{ count($directors) }}</p><p class="text-sm text-slate-300">Direksi</p></div>
+                <div class="rounded-2xl bg-white/10 p-4"><p class="text-3xl font-bold">{{ count($commissioners) }}</p><p class="text-sm text-slate-300">Komisaris</p></div>
             </div>
         </div>
     </div>
@@ -28,35 +33,22 @@
         </div>
 
         <div class="mt-12 grid gap-6 md:grid-cols-2">
-            <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10 overflow-hidden p-0">
-                <div class="bg-gradient-to-br from-blue-900 to-blue-700 p-8 text-white">
-                    <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-800">HH</div>
-                    <h3 class="mt-6 text-2xl font-bold">Heri Heryanto SH, MM</h3>
-                    <p class="mt-2 text-blue-100">Direktur Utama</p>
-                </div>
-                <div class="p-8">
-                    <p class="leading-7 text-slate-600">Memimpin arah operasional dan pengelolaan perusahaan sesuai peran direktur utama dalam struktur organisasi.</p>
-                    <div class="mt-6 rounded-2xl bg-slate-50 p-5">
-                        <p class="text-sm font-semibold text-slate-500">Peran dalam Struktur</p>
-                        <p class="mt-1 text-sm text-slate-600">Informasi jabatan ditampilkan sebagai bagian dari transparansi profil perusahaan.</p>
+            @foreach ($directors as $index => $person)
+                <article class="rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
+                    <div class="{{ $index % 2 === 0 ? 'bg-gradient-to-br from-blue-900 to-blue-700' : 'bg-gradient-to-br from-slate-900 to-blue-800' }} p-8 text-white">
+                        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-800">{{ $person['initials'] }}</div>
+                        <h3 class="mt-6 text-2xl font-bold">{{ $person['name'] }}</h3>
+                        <p class="mt-2 text-blue-100">{{ $person['position'] }}</p>
                     </div>
-                </div>
-            </article>
-
-            <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10 overflow-hidden p-0">
-                <div class="bg-gradient-to-br from-slate-900 to-blue-800 p-8 text-white">
-                    <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-800">AH</div>
-                    <h3 class="mt-6 text-2xl font-bold">Atjeng Hadis Susanto SE</h3>
-                    <p class="mt-2 text-blue-100">Direktur</p>
-                </div>
-                <div class="p-8">
-                    <p class="leading-7 text-slate-600">Mendukung pengelolaan dan pelaksanaan operasional perusahaan sesuai peran direktur dalam struktur organisasi.</p>
-                    <div class="mt-6 rounded-2xl bg-slate-50 p-5">
-                        <p class="text-sm font-semibold text-slate-500">Peran dalam Struktur</p>
-                        <p class="mt-1 text-sm text-slate-600">Informasi jabatan ditampilkan sebagai bagian dari transparansi profil perusahaan.</p>
+                    <div class="p-8">
+                        <p class="leading-7 text-slate-600">{{ $person['bio'] }}</p>
+                        <div class="mt-6 rounded-2xl bg-slate-50 p-5">
+                            <p class="text-sm font-semibold text-slate-500">Peran dalam Struktur</p>
+                            <p class="mt-1 text-sm text-slate-600">Informasi jabatan ditampilkan sebagai bagian dari transparansi profil perusahaan.</p>
+                        </div>
                     </div>
-                </div>
-            </article>
+                </article>
+            @endforeach
         </div>
     </div>
 </section>
@@ -70,27 +62,18 @@
         </div>
 
         <div class="mt-12 grid gap-6 md:grid-cols-2">
-            <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
-                <div class="flex items-start gap-5">
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">JS</div>
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-950">Jaja Sumarna SE</h3>
-                        <p class="mt-1 text-sm font-semibold text-blue-700">Komisaris Utama</p>
-                        <p class="mt-4 leading-7 text-slate-600">Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).</p>
+            @foreach ($commissioners as $person)
+                <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
+                    <div class="flex items-start gap-5">
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">{{ $person['initials'] }}</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-950">{{ $person['name'] }}</h3>
+                            <p class="mt-1 text-sm font-semibold text-blue-700">{{ $person['position'] }}</p>
+                            <p class="mt-4 leading-7 text-slate-600">{{ $person['bio'] }}</p>
+                        </div>
                     </div>
-                </div>
-            </article>
-
-            <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
-                <div class="flex items-start gap-5">
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">DK</div>
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-950">Dikdik Kustiadi</h3>
-                        <p class="mt-1 text-sm font-semibold text-blue-700">Komisaris</p>
-                        <p class="mt-4 leading-7 text-slate-600">Informasi jabatan ditampilkan sebagai bagian dari struktur pengurus PT BPR Karawang Jabar (Perseroda).</p>
-                    </div>
-                </div>
-            </article>
+                </article>
+            @endforeach
         </div>
     </div>
 </section>

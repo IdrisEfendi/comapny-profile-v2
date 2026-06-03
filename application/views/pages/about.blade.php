@@ -1,5 +1,10 @@
 @layout('layouts.app')
 
+@php
+    $settings = public_settings();
+    $profile = public_company_profile();
+@endphp
+
 @section('content')
 <section class="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-slate-950 py-20 text-white sm:py-24">
     <div class="absolute inset-0 bg-blue-900/20"></div>
@@ -7,8 +12,8 @@
         <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Tentang Kami</p>
         <div class="mt-5 grid gap-8 lg:grid-cols-2 lg:items-end">
             <div>
-                <h1 class="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">PT BPR Karawang Jabar (Perseroda)</h1>
-                <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Profil PT BPR Karawang Jabar (Perseroda) sebagai BPR yang dekat dengan masyarakat Karawang, khususnya area Cilamaya dan sekitarnya.</p>
+                <h1 class="max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">{{ $settings['company_name'] }}</h1>
+                <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{{ $profile['hero_intro'] }}</p>
             </div>
             <div class="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
                 <p class="text-sm font-semibold text-blue-100">Profil Singkat</p>
@@ -22,23 +27,23 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-12 lg:grid-cols-2 lg:items-start">
         <div class="lg:sticky lg:top-32">
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Profil Perusahaan</p>
-            <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">BPR yang dekat dengan kebutuhan masyarakat Karawang</h2>
-            <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">Halaman ini dirancang untuk menjelaskan identitas, area layanan, nilai, dan informasi penting PT BPR Karawang Jabar (Perseroda) secara lebih terstruktur.</p>
+            <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">{{ $profile['profile_heading'] }}</h2>
+            <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">Halaman ini dirancang untuk menjelaskan identitas, area layanan, nilai, dan informasi penting {{ $settings['company_name'] }} secara lebih terstruktur.</p>
         </div>
 
         <div class="space-y-6">
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                 <h3 class="text-xl font-bold text-slate-950">Ringkasan</h3>
-                <p class="mt-4 leading-7 text-slate-600">PT BPR Karawang Jabar (Perseroda) merupakan BPR yang berfokus melayani kebutuhan keuangan masyarakat Karawang. Website ini disiapkan sebagai media informasi publik agar profil perusahaan, produk, pengurus, dan kanal kontak dapat diakses dengan mudah.</p>
+                <p class="mt-4 leading-7 text-slate-600">{{ $profile['profile_summary'] }}</p>
             </div>
             <div class="grid gap-6 sm:grid-cols-2">
                 <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                     <h3 class="text-lg font-bold text-slate-950">Area Layanan</h3>
-                    <p class="mt-3 leading-7 text-slate-600">Karawang dan sekitarnya, dengan informasi kantor yang merujuk ke area Cilamaya Wetan.</p>
+                    <p class="mt-3 leading-7 text-slate-600">{{ $profile['area_service'] }}</p>
                 </div>
                 <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                     <h3 class="text-lg font-bold text-slate-950">Fokus Informasi</h3>
-                    <p class="mt-3 leading-7 text-slate-600">Profil BPR, produk TAHARA, pengurus, alamat, telepon, email, dan jam layanan.</p>
+                    <p class="mt-3 leading-7 text-slate-600">{{ $profile['information_focus'] }}</p>
                 </div>
             </div>
         </div>
@@ -83,12 +88,12 @@
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Visi</p>
             <h2 class="mt-3 text-2xl font-bold text-slate-950">Arah Visi</h2>
-            <p class="mt-4 leading-7 text-slate-600">Menjadi BPR daerah yang dikenal dekat dengan masyarakat, mudah diakses, dan mampu mendukung kebutuhan layanan keuangan masyarakat Karawang.</p>
+            <p class="mt-4 leading-7 text-slate-600">{{ $profile['vision'] }}</p>
         </div>
         <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Misi</p>
             <h2 class="mt-3 text-2xl font-bold text-slate-950">Arah Misi</h2>
-            <p class="mt-4 leading-7 text-slate-600">Menyediakan informasi layanan yang jelas, membangun komunikasi yang terbuka, serta membantu masyarakat memperoleh akses informasi produk BPR dengan mudah.</p>
+            <p class="mt-4 leading-7 text-slate-600">{{ $profile['mission'] }}</p>
         </div>
     </div>
 </section>
@@ -104,11 +109,11 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-sm font-semibold text-slate-500">Alamat</p>
-                    <p class="mt-1 font-semibold leading-6 text-slate-950">Jln Raya Cilamaya Komplek Kantor Kecamatan Cilamaya Wetan</p>
+                    <p class="mt-1 font-semibold leading-6 text-slate-950">{{ $settings['address'] }}</p>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <div class="rounded-2xl bg-slate-50 p-4"><p class="text-sm font-semibold text-slate-500">Telepon</p><p class="mt-1 font-bold text-slate-950">(0264) 8380203</p></div>
-                    <div class="rounded-2xl bg-slate-50 p-4"><p class="text-sm font-semibold text-slate-500">Jam Buka</p><p class="mt-1 font-bold text-slate-950">08:00 - 14:00</p></div>
+                    <div class="rounded-2xl bg-slate-50 p-4"><p class="text-sm font-semibold text-slate-500">Telepon</p><p class="mt-1 font-bold text-slate-950">{{ $settings['phone'] }}</p></div>
+                    <div class="rounded-2xl bg-slate-50 p-4"><p class="text-sm font-semibold text-slate-500">Jam Buka</p><p class="mt-1 font-bold text-slate-950">{{ $settings['office_hours'] }}</p></div>
                 </div>
                 <a href="{{ url('kontak') }}" class="inline-flex items-center justify-center rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-blue-950 w-full">Lihat Kontak Lengkap</a>
             </div>
