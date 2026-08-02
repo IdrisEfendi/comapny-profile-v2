@@ -32,6 +32,7 @@
                 <a href="{{ url('admin/company-profile') }}" class="{{ $base }} {{ $active === 'company' ? $on : '' }}">Profil Perusahaan</a>
                 <a href="{{ url('admin/products') }}" class="{{ $base }} {{ $active === 'products' ? $on : '' }}">Produk</a>
                 <a href="{{ url('admin/management') }}" class="{{ $base }} {{ $active === 'management' ? $on : '' }}">Pengurus</a>
+                <a href="{{ url('admin/news') }}" class="{{ $base }} {{ $active === 'news' ? $on : '' }}">Berita & Pengumuman</a>
                 <a href="{{ url('admin/contact-messages') }}" class="{{ $base }} {{ $active === 'messages' ? $on : '' }}">
                     <span class="flex items-center justify-between gap-3">
                         <span>Pesan Kontak</span>

@@ -23,6 +23,7 @@
                 <li><a class="hover:text-blue-700" href="{{ url('tentang-kami') }}">Tentang Kami</a></li>
                 <li><a class="hover:text-blue-700" href="{{ url('produk-layanan') }}">Produk & Layanan</a></li>
                 <li><a class="hover:text-blue-700" href="{{ url('pengurus') }}">Pengurus</a></li>
+                <li><a class="hover:text-blue-700" href="{{ url('berita') }}">Berita</a></li>
                 <li><a class="hover:text-blue-700" href="{{ url('kontak') }}">Kontak</a></li>
             </ul>
         </div>

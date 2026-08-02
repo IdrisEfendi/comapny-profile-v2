@@ -34,6 +34,7 @@
                     <a class="{{ $desktopBase }} {{ $active === 'about' ? $desktopActive : '' }}" href="{{ url('tentang-kami') }}">Tentang Kami</a>
                     <a class="{{ $desktopBase }} {{ $active === 'products' ? $desktopActive : '' }}" href="{{ url('produk-layanan') }}">Produk & Layanan</a>
                     <a class="{{ $desktopBase }} {{ $active === 'management' ? $desktopActive : '' }}" href="{{ url('pengurus') }}">Pengurus</a>
+                    <a class="{{ $desktopBase }} {{ $active === 'news' ? $desktopActive : '' }}" href="{{ url('berita') }}">Berita</a>
                     <a class="{{ $desktopBase }} {{ $active === 'contact' ? $desktopActive : '' }}" href="{{ url('kontak') }}">Kontak</a>
                 </div>
 
@@ -58,6 +59,7 @@
                     <a class="{{ $mobileBase }} {{ $active === 'about' ? $mobileActive : '' }}" href="{{ url('tentang-kami') }}">Tentang Kami</a>
                     <a class="{{ $mobileBase }} {{ $active === 'products' ? $mobileActive : '' }}" href="{{ url('produk-layanan') }}">Produk & Layanan</a>
                     <a class="{{ $mobileBase }} {{ $active === 'management' ? $mobileActive : '' }}" href="{{ url('pengurus') }}">Pengurus</a>
+                    <a class="{{ $mobileBase }} {{ $active === 'news' ? $mobileActive : '' }}" href="{{ url('berita') }}">Berita</a>
                     <a class="{{ $mobileBase }} {{ $active === 'contact' ? $mobileActive : '' }}" href="{{ url('kontak') }}">Kontak</a>
                     <a href="{{ url('kontak') }}" class="mt-3 flex items-center justify-center rounded-2xl bg-amber-400 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-amber-300">Hubungi Kami</a>
                 </div>

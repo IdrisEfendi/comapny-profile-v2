@@ -158,6 +158,7 @@ function admin_default_settings()
         'office_hours' => 'Senin - Jumat, 08:00 - 14:00',
         'whatsapp' => '',
         'google_maps_url' => '',
+        'notification_email' => '',
     ];
 }
 
@@ -802,4 +803,175 @@ Route::post('(:package)/management/delete', function () {
     \System\Session::flash('admin_success', 'Data pengurus berhasil dihapus.');
 
     return redirect('admin/management');
+});
+
+function admin_news_filters()
+{
+    $page = max(1, (int) \System\Input::get('page', 1));
+
+    return ['page' => $page, 'perPage' => 10];
+}
+
+function admin_get_news(array $filters)
+{
+    try {
+        $offset = max(0, ($filters['page'] - 1) * $filters['perPage']);
+        $rows = \System\Database::connection()->query('SELECT slug, title, category, summary, content, is_published, published_at FROM news ORDER BY published_at DESC, id DESC LIMIT '.(int) $filters['perPage'].' OFFSET '.(int) $offset);
+        $news = [];
+
+        foreach ($rows as $row) {
+            $news[] = [
+                'slug' => $row->slug,
+                'title' => $row->title,
+                'category' => $row->category,
+                'summary' => $row->summary,
+                'content' => $row->content,
+                'is_published' => (bool) $row->is_published,
+                'published_at' => $row->published_at,
+            ];
+        }
+
+        return $news;
+    } catch (\Throwable $e) {
+        return [];
+    } catch (\Exception $e) {
+        return [];
+    }
+}
+
+function admin_count_news()
+{
+    try {
+        return (int) \System\Database::connection()->only('SELECT COUNT(*) FROM news');
+    } catch (\Throwable $e) {
+        return 0;
+    } catch (\Exception $e) {
+        return 0;
+    }
+}
+
+function admin_news_slug($slug, $fallback = 'berita')
+{
+    $source = trim((string) $slug);
+    $slug = strtolower($source !== '' ? $source : $fallback);
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+    $slug = trim($slug, '-');
+
+    return $slug !== '' ? $slug : 'berita';
+}
+
+Route::get('(:package)/news', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    $filters = admin_news_filters();
+    $total = admin_count_news();
+    $totalPages = max(1, (int) ceil($total / $filters['perPage']));
+
+    if ($filters['page'] > $totalPages) {
+        $filters['page'] = $totalPages;
+    }
+
+    return view('admin::news', [
+        'title' => 'Berita & Pengumuman',
+        'active' => 'news',
+        'news' => admin_get_news($filters),
+        'filters' => $filters,
+        'total' => $total,
+        'totalPages' => $totalPages,
+        'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::post('(:package)/news', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    if ($redirect = admin_require_csrf('admin/news')) {
+        return $redirect;
+    }
+
+    $conn = \System\Database::connection();
+    $now = date('Y-m-d H:i:s');
+    $page = max(1, (int) \System\Input::get('page', 1));
+    $originalSlug = text_limit(\System\Input::get('original_slug'), 160);
+    $title = text_limit(\System\Input::get('title'), 190);
+    $slug = admin_news_slug(\System\Input::get('slug'), $title);
+    $category = text_limit(\System\Input::get('category'), 120);
+    $summary = text_limit(\System\Input::get('summary'), 5000);
+    $content = text_limit(\System\Input::get('content'), 50000);
+    $isPublished = (bool) \System\Input::get('is_published');
+    $redirectTo = $page > 1 ? 'admin/news?page='.$page : 'admin/news';
+
+    if ($title === '') {
+        \System\Session::flash('admin_error', 'Judul berita wajib diisi.');
+        return redirect($redirectTo);
+    }
+
+    try {
+        $bindings = $originalSlug !== '' ? [$slug, $originalSlug] : [$slug];
+        $checkSlug = $originalSlug !== '' ? 'SELECT COUNT(*) FROM news WHERE slug = ? AND slug != ?' : 'SELECT COUNT(*) FROM news WHERE slug = ?';
+
+        if ((int) $conn->only($checkSlug, $bindings) > 0) {
+            \System\Session::flash('admin_error', 'Slug "'.$slug.'" sudah dipakai berita lain. Gunakan slug yang berbeda.');
+            return redirect($redirectTo);
+        }
+
+        $existing = $originalSlug !== '' ? $conn->first('SELECT id, published_at FROM news WHERE slug = ? LIMIT 1', [$originalSlug]) : null;
+        $publishedAt = $existing ? $existing->published_at : null;
+
+        if ($isPublished) {
+            if (! $publishedAt) {
+                $publishedAt = $now;
+            }
+        } else {
+            $publishedAt = null;
+        }
+
+        if ($existing) {
+            $conn->query('UPDATE news SET slug = ?, title = ?, category = ?, summary = ?, content = ?, is_published = ?, published_at = ?, updated_at = ? WHERE id = ?', [
+                $slug, $title, $category, $summary, $content, $isPublished ? 1 : 0, $publishedAt, $now, $existing->id,
+            ]);
+        } else {
+            $conn->query('INSERT INTO news (slug, title, category, summary, content, is_published, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $slug, $title, $category, $summary, $content, $isPublished ? 1 : 0, $publishedAt, $now, $now,
+            ]);
+        }
+
+        \System\Session::flash('admin_success', 'Berita berhasil disimpan.');
+    } catch (\Throwable $e) {
+        \System\Session::flash('admin_error', 'Gagal menyimpan berita. Periksa database dan skema tabel news.');
+    } catch (\Exception $e) {
+        \System\Session::flash('admin_error', 'Gagal menyimpan berita. Periksa database dan skema tabel news.');
+    }
+
+    return redirect($redirectTo);
+});
+
+Route::post('(:package)/news/delete', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    if ($redirect = admin_require_csrf('admin/news')) {
+        return $redirect;
+    }
+
+    $page = max(1, (int) \System\Input::get('page', 1));
+    $redirectTo = $page > 1 ? 'admin/news?page='.$page : 'admin/news';
+
+    try {
+        $slug = text_limit(\System\Input::get('slug'), 160);
+        \System\Database::connection()->query('DELETE FROM news WHERE slug = ?', [$slug]);
+        \System\Session::flash('admin_success', 'Berita berhasil dihapus.');
+    } catch (\Throwable $e) {
+        \System\Session::flash('admin_error', 'Gagal menghapus berita.');
+    } catch (\Exception $e) {
+        \System\Session::flash('admin_error', 'Gagal menghapus berita.');
+    }
+
+    return redirect($redirectTo);
 });

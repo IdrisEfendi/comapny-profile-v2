@@ -25,6 +25,10 @@
             <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="email" name="email" type="email" value="{{ $settings['email'] }}">
         </div>
         <div>
+            <label class="block text-sm font-semibold text-slate-700" for="notification_email">Email Notifikasi Kontak</label>
+            <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="notification_email" name="notification_email" type="email" value="{{ $settings['notification_email'] }}" placeholder="Kosongkan untuk memakai Email di atas">
+        </div>
+        <div>
             <label class="block text-sm font-semibold text-slate-700" for="office_hours">Jam Layanan</label>
             <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="office_hours" name="office_hours" type="text" value="{{ $settings['office_hours'] }}">
         </div>

@@ -32,6 +32,24 @@ Route::get('pengurus', function () {
     return view('pages.management', ['title' => 'Pengurus', 'active' => 'management']);
 });
 
+Route::get('berita', function () {
+    return view('pages.news', ['title' => 'Berita & Pengumuman', 'active' => 'news']);
+});
+
+Route::get('berita/(:any)', function ($slug) {
+    $item = public_news_by_slug($slug);
+
+    if (! $item) {
+        return \System\Event::first('404');
+    }
+
+    return view('news.detail', [
+        'title' => $item['title'],
+        'active' => 'news',
+        'item' => $item,
+    ]);
+});
+
 Route::get('kontak', function () {
     return view('pages.contact', [
         'title' => 'Kontak',
@@ -59,6 +77,10 @@ Route::post('kontak', function () {
     $subject = text_limit(\System\Input::get('subject'), 190);
     $message = text_limit(\System\Input::get('message'), 5000);
 
+    if ($subject === '') {
+        $subject = 'Pesan dari website';
+    }
+
     if ($name === '' || $contact === '' || $message === '') {
         \System\Session::flash('contact_error', 'Nama, email/telepon, dan pesan wajib diisi.');
         return redirect('kontak');
@@ -72,12 +94,19 @@ Route::post('kontak', function () {
     \System\Database::connection()->query('INSERT INTO contact_messages (name, contact, subject, message, ip_address, user_agent, is_read, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)', [
         $name,
         $contact,
-        $subject !== '' ? $subject : 'Pesan dari website',
+        $subject,
         $message,
         $_SERVER['REMOTE_ADDR'] ?? null,
         substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
         date('Y-m-d H:i:s'),
         date('Y-m-d H:i:s'),
+    ]);
+
+    send_contact_notification_email([
+        'name' => $name,
+        'contact' => $contact,
+        'subject' => $subject,
+        'message' => $message,
     ]);
 
     \System\Session::put('contact_last_submit_at', time());

@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'driver' => 'mail',
+    'driver' => env('EMAIL_DRIVER', 'mail'),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,10 +29,10 @@ return [
     */
 
     'smtp' => [
-        'host' => '',
-        'port' => 465,
-        'username' => '',
-        'password' => '',
+        'host' => env('EMAIL_SMTP_HOST', ''),
+        'port' => (int) env('EMAIL_SMTP_PORT', 465),
+        'username' => env('EMAIL_SMTP_USERNAME', ''),
+        'password' => env('EMAIL_SMTP_PASSWORD', ''),
         'timeout' => 5,
         'starttls' => true,
         'options' => [
@@ -111,8 +111,8 @@ return [
     */
 
     'from' => [
-        'email' => null,
-        'name' => null,
+        'email' => env('EMAIL_FROM_ADDRESS'),
+        'name' => env('EMAIL_FROM_NAME'),
     ],
 
     /*

@@ -53,6 +53,7 @@ if (! function_exists('public_default_settings')) {
             'office_hours' => 'Senin - Jumat, 08:00 - 14:00',
             'whatsapp' => '',
             'google_maps_url' => '',
+            'notification_email' => '',
         ];
     }
 }
@@ -221,6 +222,142 @@ if (! function_exists('public_product_initial')) {
     function public_product_initial(array $product)
     {
         return strtoupper(substr($product['name'] ?? 'P', 0, 1));
+    }
+}
+
+if (! function_exists('public_default_news')) {
+    function public_default_news()
+    {
+        return [];
+    }
+}
+
+if (! function_exists('public_news')) {
+    function public_news()
+    {
+        static $news;
+
+        if ($news !== null) {
+            return $news;
+        }
+
+        try {
+            $rows = \System\Database::connection()->query('SELECT slug, title, category, summary, published_at FROM news WHERE is_published = 1 ORDER BY published_at DESC, id DESC');
+            $news = [];
+
+            foreach ($rows as $row) {
+                $news[] = [
+                    'slug' => $row->slug,
+                    'title' => $row->title,
+                    'category' => $row->category,
+                    'summary' => $row->summary,
+                    'published_at' => $row->published_at,
+                ];
+            }
+
+            if (count($news) === 0) {
+                $news = public_default_news();
+            }
+        } catch (\Throwable $e) {
+            $news = public_default_news();
+        } catch (\Exception $e) {
+            $news = public_default_news();
+        }
+
+        return $news;
+    }
+}
+
+if (! function_exists('public_news_by_slug')) {
+    function public_news_by_slug($slug)
+    {
+        $slug = trim((string) $slug);
+
+        if ($slug === '') {
+            return null;
+        }
+
+        try {
+            $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, published_at FROM news WHERE slug = ? AND is_published = 1 LIMIT 1', [$slug]);
+
+            if (! $row) {
+                return null;
+            }
+
+            return [
+                'id' => (int) $row->id,
+                'slug' => $row->slug,
+                'title' => $row->title,
+                'category' => $row->category,
+                'summary' => $row->summary,
+                'content' => $row->content,
+                'published_at' => $row->published_at,
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+}
+
+if (! function_exists('public_format_date')) {
+    function public_format_date($date)
+    {
+        $date = trim((string) $date);
+
+        if ($date === '' || ! preg_match('/^\d{4}-\d{2}-\d{2}/', $date, $match)) {
+            return '';
+        }
+
+        $parts = explode('-', $match[0]);
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+        $month = (int) $parts[1];
+
+        return (int) $parts[2].' '.($months[$month] ?? $parts[1]).' '.$parts[0];
+    }
+}
+
+if (! function_exists('send_contact_notification_email')) {
+    function send_contact_notification_email(array $data)
+    {
+        try {
+            $settings = public_settings();
+            $to = trim((string) ($settings['notification_email'] ?? ''));
+            $to = $to !== '' ? $to : trim((string) $settings['email']);
+            $from = trim((string) $settings['email']);
+
+            if ($to === '' || $from === '' || ! filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                return false;
+            }
+
+            $subject = trim((string) ($data['subject'] ?? ''));
+            $subject = $subject !== '' ? $subject : 'Pesan dari website';
+            $lines = [];
+            $lines[] = 'Pesan kontak baru dari website '.$settings['company_name'].'.';
+            $lines[] = '';
+            $lines[] = 'Nama: '.$data['name'];
+            $lines[] = 'Email/Telepon: '.$data['contact'];
+            $lines[] = 'Subjek: '.$subject;
+            $lines[] = 'Pesan:';
+            $lines[] = $data['message'];
+
+            \System\Email::from($from, $settings['company_name'])
+                ->to($to)
+                ->subject('[Kontak Website] '.$subject)
+                ->body(implode(PHP_EOL, $lines))
+                ->send();
+
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
 
