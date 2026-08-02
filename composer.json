@@ -43,15 +43,20 @@
         }
     },
     "scripts": {
-        "post-create-project-cmd": ["@php rakit key:generate"]
-      },
-      "config": {
+        "post-create-project-cmd": [
+            "@php rakit key:generate"
+        ]
+    },
+    "config": {
         "optimize-autoloader": true,
-        "preferred-install": "dist"
-      },
-      "minimum-stability": "dev",
-      "prefer-stable": true,
-      "autoload": {
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "cweagans/composer-patches": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
         "files": [
             "application/helpers/myhelper.php"
         ]
