@@ -529,11 +529,18 @@ class Debugger
         }
 
         $message = 'PHP '.Helpers::errorTypeToString($severity).': '.Helpers::improveError($message, $context);
-        $count = &self::getBar()->getPanel('Oops:errors')->data["$file|$line|$message"];
 
-        if ($count++) {
-            return;
-        } elseif (self::$productionMode) {
+        $errorsPanel = self::getBar()->getPanel('Oops:errors');
+
+        if ($errorsPanel) {
+            $count = &$errorsPanel->data["$file|$line|$message"];
+
+            if ($count++) {
+                return;
+            }
+        }
+
+        if (self::$productionMode) {
             try {
                 self::log("$message in $file:$line", self::ERROR);
             } catch (\Throwable $foo) {
