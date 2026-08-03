@@ -1,5 +1,33 @@
 @layout('layouts.app')
 
+@php
+    $jsonLdSettings = public_settings();
+    $jsonLdRequest = \System\Request::foundation();
+    $jsonLdBase = $jsonLdRequest->getScheme().'://'.$jsonLdRequest->getHttpHost();
+    $jsonLdSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'FinancialService',
+        'name' => $jsonLdSettings['company_name'],
+        'description' => $jsonLdSettings['tagline'],
+        'url' => $jsonLdBase.'/',
+        'telephone' => $jsonLdSettings['phone'],
+        'email' => $jsonLdSettings['email'],
+        'address' => [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $jsonLdSettings['address'],
+            'addressCountry' => 'ID',
+        ],
+        'openingHours' => 'Mo-Fr 08:00-14:00',
+        'priceRange' => '$$',
+    ];
+@endphp
+
+@section('head')
+<script type="application/ld+json">
+{!! json_encode($jsonLdSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+</script>
+@endsection
+
 @section('content')
 <section class="relative overflow-hidden bg-slate-950">
     <div class="absolute inset-0 bg-blue-900/20"></div>

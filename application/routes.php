@@ -3,15 +3,27 @@
 defined('DS') or exit('No direct script access.');
 
 Route::get('/', function () {
-    return view('home.index', ['title' => 'Home', 'active' => 'home']);
+    return view('home.index', [
+        'title' => '',
+        'active' => 'home',
+        'description' => 'Website resmi PT BPR Karawang Jabar (Perseroda): profil perusahaan, produk TAHARA, pengurus, serta kanal kontak BPR di Karawang.',
+    ]);
 });
 
 Route::get('tentang-kami', function () {
-    return view('pages.about', ['title' => 'Tentang Kami', 'active' => 'about']);
+    return view('pages.about', [
+        'title' => 'Tentang Kami',
+        'active' => 'about',
+        'description' => 'Profil, visi, misi, dan area layanan PT BPR Karawang Jabar (Perseroda), BPR yang dekat dengan masyarakat Karawang.',
+    ]);
 });
 
 Route::get('produk-layanan', function () {
-    return view('pages.products', ['title' => 'Produk & Layanan', 'active' => 'products']);
+    return view('pages.products', [
+        'title' => 'Produk & Layanan',
+        'active' => 'products',
+        'description' => 'Daftar produk dan layanan PT BPR Karawang Jabar (Perseroda), termasuk TAHARA (Tabungan Hari Raya).',
+    ]);
 });
 
 Route::get('produk/(:any)', function ($slug) {
@@ -25,15 +37,24 @@ Route::get('produk/(:any)', function ($slug) {
         'title' => $product['name'],
         'active' => 'products',
         'product' => $product,
+        'description' => text_limit($product['summary'], 160),
     ]);
 });
 
 Route::get('pengurus', function () {
-    return view('pages.management', ['title' => 'Pengurus', 'active' => 'management']);
+    return view('pages.management', [
+        'title' => 'Pengurus',
+        'active' => 'management',
+        'description' => 'Daftar direksi dan komisaris PT BPR Karawang Jabar (Perseroda).',
+    ]);
 });
 
 Route::get('berita', function () {
-    return view('pages.news', ['title' => 'Berita & Pengumuman', 'active' => 'news']);
+    return view('pages.news', [
+        'title' => 'Berita & Pengumuman',
+        'active' => 'news',
+        'description' => 'Berita dan pengumuman terbaru dari PT BPR Karawang Jabar (Perseroda).',
+    ]);
 });
 
 Route::get('berita/(:any)', function ($slug) {
@@ -47,6 +68,8 @@ Route::get('berita/(:any)', function ($slug) {
         'title' => $item['title'],
         'active' => 'news',
         'item' => $item,
+        'description' => text_limit($item['summary'], 160),
+        'og_type' => 'article',
     ]);
 });
 
@@ -54,6 +77,7 @@ Route::get('kontak', function () {
     return view('pages.contact', [
         'title' => 'Kontak',
         'active' => 'contact',
+        'description' => 'Alamat, telepon, email, dan jam layanan PT BPR Karawang Jabar (Perseroda) di Cilamaya Wetan, Karawang.',
         'success' => \System\Session::get('contact_success'),
         'error' => \System\Session::get('contact_error'),
     ]);
@@ -112,4 +136,50 @@ Route::post('kontak', function () {
     \System\Session::put('contact_last_submit_at', time());
     \System\Session::flash('contact_success', 'Pesan berhasil dikirim. Tim kami akan menindaklanjuti melalui kontak yang Anda cantumkan.');
     return redirect('kontak');
+});
+
+Route::get('sitemap.xml', function () {
+    $request = \System\Request::foundation();
+    $base = $request->getScheme().'://'.$request->getHttpHost();
+
+    $urls = [
+        ['loc' => $base.'/', 'lastmod' => date('Y-m-d'), 'freq' => 'daily', 'priority' => '1.0'],
+        ['loc' => $base.'/tentang-kami', 'freq' => 'monthly', 'priority' => '0.8'],
+        ['loc' => $base.'/produk-layanan', 'freq' => 'weekly', 'priority' => '0.8'],
+        ['loc' => $base.'/pengurus', 'freq' => 'monthly', 'priority' => '0.6'],
+        ['loc' => $base.'/berita', 'freq' => 'weekly', 'priority' => '0.7'],
+        ['loc' => $base.'/kontak', 'freq' => 'monthly', 'priority' => '0.7'],
+    ];
+
+    foreach (public_products() as $product) {
+        $urls[] = ['loc' => $base.'/produk/'.$product['slug'], 'freq' => 'monthly', 'priority' => '0.7'];
+    }
+
+    foreach (public_news() as $item) {
+        $lastmod = (isset($item['published_at']) && $item['published_at'] !== '') ? substr($item['published_at'], 0, 10) : date('Y-m-d');
+        $urls[] = ['loc' => $base.'/berita/'.$item['slug'], 'lastmod' => $lastmod, 'freq' => 'monthly', 'priority' => '0.6'];
+    }
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
+
+    foreach ($urls as $url) {
+        $xml .= "\t".'<url>'."\n";
+        $xml .= "\t\t".'<loc>'.htmlspecialchars($url['loc'], ENT_XML1, 'UTF-8').'</loc>'."\n";
+
+        if (! empty($url['lastmod'])) {
+            $xml .= "\t\t".'<lastmod>'.$url['lastmod'].'</lastmod>'."\n";
+        }
+
+        if (! empty($url['freq'])) {
+            $xml .= "\t\t".'<changefreq>'.$url['freq'].'</changefreq>'."\n";
+        }
+
+        $xml .= "\t\t".'<priority>'.$url['priority'].'</priority>'."\n";
+        $xml .= "\t".'</url>'."\n";
+    }
+
+    $xml .= '</urlset>';
+
+    return \System\Response::make($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
 });

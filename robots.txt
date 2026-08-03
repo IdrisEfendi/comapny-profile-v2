@@ -6,3 +6,5 @@ Disallow: /packages/*
 Disallow: /storage/*
 Disallow: /system/*
 Disallow: /vendor/*
+
+Sitemap: https://bprkarawangjabar.com/sitemap.xml
