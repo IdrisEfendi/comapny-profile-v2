@@ -51,15 +51,11 @@
 
             <div>
                 <label class="block text-sm font-semibold text-slate-700">Isi Berita</label>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                    <span class="text-xs text-slate-500">JPG, PNG, WEBP, GIF, atau PDF. Maksimal 2MB.</span>
-                </div>
-                <input type="file" id="image-picker" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
                 <div class="mt-3 overflow-hidden rounded-2xl border border-slate-300 bg-white">
                     <div id="content-editor" class="min-h-64 text-sm text-slate-800"></div>
                 </div>
                 <textarea class="hidden" name="content" id="content-input">{{ $n['content'] }}</textarea>
-                <p class="mt-2 text-xs text-slate-500">Gunakan toolbar untuk memformat teks dan menyisipkan gambar.</p>
+                <p class="mt-2 text-xs text-slate-500">Gunakan toolbar untuk memformat teks.</p>
             </div>
 
             <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
@@ -72,10 +68,6 @@
                         return;
                     }
 
-                    var imagePicker = document.getElementById('image-picker');
-                    var uploadUrl = '{{ url('admin/news/upload') }}';
-                    var csrfToken = (input.form && input.form.querySelector('input[name="_token"]')) ? input.form.querySelector('input[name="_token"]').value : '';
-
                     var quill = new Quill(editor, {
                         theme: 'snow',
                         placeholder: 'Tulis isi berita di sini...',
@@ -86,16 +78,8 @@
                                     ['bold', 'italic', 'underline'],
                                     [{ list: 'ordered' }, { list: 'bullet' }],
                                     ['blockquote', 'link'],
-                                    ['image'],
                                     ['clean']
-                                ],
-                                handlers: {
-                                    image: function () {
-                                        if (imagePicker) {
-                                            imagePicker.click();
-                                        }
-                                    }
-                                }
+                                ]
                             }
                         }
                     });
@@ -120,55 +104,6 @@
                     }
 
                     quill.root.innerHTML = toHtml(input.value);
-
-                    var insertIndex = quill.getLength();
-                    quill.on('selection-change', function (range) {
-                        if (range) {
-                            insertIndex = range.index;
-                        }
-                    });
-
-                    function uploadFile(file, done) {
-                        var data = new FormData();
-                        data.append('file', file);
-                        data.append('_token', csrfToken);
-
-                        fetch(uploadUrl, {
-                            method: 'POST',
-                            body: data,
-                            credentials: 'same-origin',
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        }).then(function (response) {
-                            return response.json();
-                        }).then(function (json) {
-                            if (! json || ! json.ok) {
-                                throw new Error((json && json.error) ? json.error : 'Upload gagal.');
-                            }
-
-                            done(json);
-                        }).catch(function (error) {
-                            window.alert('Gagal mengunggah file: ' + error.message);
-                        });
-                    }
-
-                    function insertImage() {
-                        if (! imagePicker || ! imagePicker.files.length) {
-                            return;
-                        }
-
-                        var file = imagePicker.files[0];
-                        var index = insertIndex;
-                        imagePicker.value = '';
-
-                        uploadFile(file, function (json) {
-                            quill.insertEmbed(index, 'image', json.url, 'user');
-                            quill.setSelection(index + 1, 'user');
-                        });
-                    }
-
-                    if (imagePicker) {
-                        imagePicker.addEventListener('change', insertImage);
-                    }
 
                     var form = editor.closest('form');
 
