@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ isset($title) ? $title.' - ' : '' }}Admin BPR Karawang</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    @yield('head')
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
     <div class="min-h-screen lg:flex">

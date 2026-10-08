@@ -72,6 +72,41 @@ function admin_update_current_user($username, $name, $password = null)
     \System\Session::put('admin_username', $username);
 }
 
+function admin_list_users()
+{
+    $rows = \System\Database::connection()->query('SELECT id, username, name, is_active, last_login_at FROM admin_users ORDER BY id ASC');
+    $users = [];
+
+    foreach ($rows as $row) {
+        $users[] = [
+            'id' => (int) $row->id,
+            'username' => $row->username,
+            'name' => $row->name,
+            'is_active' => (bool) $row->is_active,
+            'last_login_at' => $row->last_login_at,
+        ];
+    }
+
+    return $users;
+}
+
+function admin_find_user($id)
+{
+    $row = \System\Database::connection()->first('SELECT id, username, name, is_active, last_login_at FROM admin_users WHERE id = ? LIMIT 1', [(int) $id]);
+
+    if (! $row) {
+        return null;
+    }
+
+    return [
+        'id' => (int) $row->id,
+        'username' => $row->username,
+        'name' => $row->name,
+        'is_active' => (bool) $row->is_active,
+        'last_login_at' => $row->last_login_at,
+    ];
+}
+
 function admin_contact_messages_url(array $params = [])
 {
     $query = array_filter($params, function ($value) {
@@ -215,7 +250,7 @@ function admin_default_products()
     ];
 }
 
-function admin_get_products()
+function admin_list_products()
 {
     $rows = \System\Database::connection()->query('SELECT id, slug, name, category, subtitle, summary, target, detail_label, is_featured FROM products ORDER BY sort_order ASC, id ASC');
     $products = [];
@@ -234,7 +269,35 @@ function admin_get_products()
         ];
     }
 
+    return $products;
+}
+
+function admin_get_products()
+{
+    $products = admin_list_products();
+
     return count($products) ? $products : admin_default_products();
+}
+
+function admin_find_product_by_id($id)
+{
+    $row = \System\Database::connection()->first('SELECT id, slug, name, category, subtitle, summary, target, detail_label, is_featured FROM products WHERE id = ? LIMIT 1', [(int) $id]);
+
+    if (! $row) {
+        return null;
+    }
+
+    return [
+        'id' => (int) $row->id,
+        'slug' => $row->slug,
+        'name' => $row->name,
+        'category' => $row->category,
+        'subtitle' => $row->subtitle,
+        'summary' => $row->summary,
+        'target' => $row->target,
+        'detail_label' => $row->detail_label,
+        'is_featured' => (bool) $row->is_featured,
+    ];
 }
 
 function admin_product_slug($name, $fallback = 'produk')
@@ -257,7 +320,7 @@ function admin_default_management()
     ];
 }
 
-function admin_get_management()
+function admin_list_management()
 {
     $rows = \System\Database::connection()->query('SELECT id, name, position, group_name, initials, bio, photo_path FROM management ORDER BY sort_order ASC, id ASC');
     $management = [];
@@ -270,11 +333,37 @@ function admin_get_management()
             'group' => $row->group_name,
             'initials' => $row->initials,
             'bio' => $row->bio,
-            'photo_path' => $row->photo_path,
+            'photo_path' => (string) $row->photo_path,
         ];
     }
 
+    return $management;
+}
+
+function admin_get_management()
+{
+    $management = admin_list_management();
+
     return count($management) ? $management : admin_default_management();
+}
+
+function admin_find_management($id)
+{
+    $row = \System\Database::connection()->first('SELECT id, name, position, group_name, initials, bio, photo_path FROM management WHERE id = ? LIMIT 1', [(int) $id]);
+
+    if (! $row) {
+        return null;
+    }
+
+    return [
+        'id' => (int) $row->id,
+        'name' => $row->name,
+        'position' => $row->position,
+        'group' => $row->group_name,
+        'initials' => $row->initials,
+        'bio' => $row->bio,
+        'photo_path' => (string) $row->photo_path,
+    ];
 }
 
 function admin_person_initials($name)
@@ -446,8 +535,42 @@ Route::get('(:package)/account', function () {
     return view('admin::account', [
         'title' => 'Akun Admin',
         'active' => 'account',
-        'user' => admin_current_user(),
+        'users' => admin_list_users(),
+        'currentId' => (int) \System\Session::get('admin_user_id', 0),
         'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/account/create', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    return view('admin::account-form', [
+        'title' => 'Tambah Akun',
+        'active' => 'account',
+        'user' => null,
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/account/(:num)/edit', function ($id) {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    $user = admin_find_user($id);
+
+    if (! $user) {
+        \System\Session::flash('admin_error', 'Akun tidak ditemukan.');
+        return redirect('admin/account');
+    }
+
+    return view('admin::account-form', [
+        'title' => 'Edit Akun',
+        'active' => 'account',
+        'user' => $user,
         'error' => \System\Session::get('admin_error'),
     ]);
 });
@@ -461,35 +584,79 @@ Route::post('(:package)/account', function () {
         return $redirect;
     }
 
-    $user = admin_current_user();
-    $username = text_limit(\System\Input::get('username'), 100);
-    $name = text_limit(\System\Input::get('name'), 190);
-    $currentPassword = (string) \System\Input::get('current_password');
-    $newPassword = (string) \System\Input::get('new_password');
-    $confirmPassword = (string) \System\Input::get('confirm_password');
+    $conn = \System\Database::connection();
+    $now = date('Y-m-d H:i:s');
+    $originalId = (int) admin_post_value('original_id');
+    $username = text_limit(admin_post_value('username'), 100);
+    $name = text_limit(admin_post_value('name'), 190);
+    $password = (string) admin_post_value('password');
+    $confirmPassword = (string) admin_post_value('confirm_password');
+    $formUrl = $originalId > 0 ? 'admin/account/'.$originalId.'/edit' : 'admin/account/create';
+    $existing = $originalId > 0 ? $conn->first('SELECT * FROM admin_users WHERE id = ? LIMIT 1', [$originalId]) : null;
 
-    if (! $user || ! password_verify($currentPassword, $user->password_hash)) {
-        \System\Session::flash('admin_error', 'Password saat ini tidak sesuai.');
+    if ($originalId > 0 && ! $existing) {
+        \System\Session::flash('admin_error', 'Akun tidak ditemukan.');
         return redirect('admin/account');
     }
 
     if ($username === '') {
         \System\Session::flash('admin_error', 'Username wajib diisi.');
-        return redirect('admin/account');
+        return redirect($formUrl);
     }
 
-    if ($newPassword !== '' && $newPassword !== $confirmPassword) {
-        \System\Session::flash('admin_error', 'Konfirmasi password baru tidak sama.');
-        return redirect('admin/account');
+    if ((int) $conn->only('SELECT COUNT(*) FROM admin_users WHERE username = ? AND id != ?', [$username, $originalId]) > 0) {
+        \System\Session::flash('admin_error', 'Username "'.$username.'" sudah dipakai akun lain.');
+        return redirect($formUrl);
     }
 
-    if ($newPassword !== '' && strlen($newPassword) < 8) {
-        \System\Session::flash('admin_error', 'Password baru minimal 8 karakter.');
-        return redirect('admin/account');
+    if (! $existing && $password === '') {
+        \System\Session::flash('admin_error', 'Password wajib diisi untuk akun baru.');
+        return redirect($formUrl);
     }
 
-    admin_update_current_user($username, $name !== '' ? $name : 'Administrator', $newPassword !== '' ? $newPassword : null);
-    \System\Session::flash('admin_success', 'Akun admin berhasil diperbarui.');
+    if ($password !== '' && $password !== $confirmPassword) {
+        \System\Session::flash('admin_error', 'Konfirmasi password tidak sama.');
+        return redirect($formUrl);
+    }
+
+    if ($password !== '' && strlen($password) < 8) {
+        \System\Session::flash('admin_error', 'Password minimal 8 karakter.');
+        return redirect($formUrl);
+    }
+
+    $displayName = $name !== '' ? $name : 'Administrator';
+
+    if ($existing) {
+        if ($password !== '') {
+            $conn->query('UPDATE admin_users SET username = ?, name = ?, password_hash = ?, updated_at = ? WHERE id = ?', [$username, $displayName, password_hash($password, PASSWORD_DEFAULT), $now, $originalId]);
+        } else {
+            $conn->query('UPDATE admin_users SET username = ?, name = ?, updated_at = ? WHERE id = ?', [$username, $displayName, $now, $originalId]);
+        }
+    } else {
+        $conn->query('INSERT INTO admin_users (username, password_hash, name, is_active, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)', [$username, password_hash($password, PASSWORD_DEFAULT), $displayName, $now, $now]);
+    }
+
+    if ($existing && (int) \System\Session::get('admin_user_id', 0) === $originalId) {
+        \System\Session::put('admin_username', $username);
+    }
+
+    \System\Session::flash('admin_success', 'Akun berhasil disimpan.');
+
+    return redirect('admin/account');
+});
+
+Route::post('(:package)/account/delete', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    if ($redirect = admin_require_csrf('admin/account')) {
+        return $redirect;
+    }
+
+    $id = (int) \System\Input::get('id');
+    \System\Database::connection()->query('DELETE FROM admin_users WHERE id = ?', [$id]);
+    \System\Session::flash('admin_success', 'Akun berhasil dihapus.');
 
     return redirect('admin/account');
 });
@@ -641,8 +808,42 @@ Route::get('(:package)/products', function () {
     return view('admin::products', [
         'title' => 'Produk',
         'active' => 'products',
-        'products' => admin_get_products(),
+        'products' => admin_list_products(),
         'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/products/create', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    return view('admin::products-form', [
+        'title' => 'Tambah Produk',
+        'active' => 'products',
+        'product' => null,
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/products/(:num)/edit', function ($id) {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    $product = admin_find_product_by_id($id);
+
+    if (! $product) {
+        \System\Session::flash('admin_error', 'Produk tidak ditemukan.');
+        return redirect('admin/products');
+    }
+
+    return view('admin::products-form', [
+        'title' => 'Edit Produk',
+        'active' => 'products',
+        'product' => $product,
+        'error' => \System\Session::get('admin_error'),
     ]);
 });
 
@@ -657,10 +858,17 @@ Route::post('(:package)/products', function () {
 
     $conn = \System\Database::connection();
     $now = date('Y-m-d H:i:s');
-    $originalSlug = text_limit(\System\Input::get('original_slug'), 160);
+    $originalId = (int) admin_post_value('original_id');
     $name = text_limit(\System\Input::get('name'), 190);
     $slug = admin_product_slug(\System\Input::get('slug'), $name);
     $isFeatured = (bool) \System\Input::get('is_featured');
+    $formUrl = $originalId > 0 ? 'admin/products/'.$originalId.'/edit' : 'admin/products/create';
+    $existing = $originalId > 0 ? $conn->first('SELECT id FROM products WHERE id = ? LIMIT 1', [$originalId]) : null;
+
+    if ($name === '') {
+        \System\Session::flash('admin_error', 'Nama produk wajib diisi.');
+        return redirect($formUrl);
+    }
 
     if ($isFeatured) {
         $conn->query('UPDATE products SET is_featured = 0');
@@ -678,8 +886,8 @@ Route::post('(:package)/products', function () {
         $now,
     ];
 
-    if ($originalSlug !== '' && (int) $conn->only('SELECT COUNT(*) FROM products WHERE slug = ?', [$originalSlug]) > 0) {
-        $conn->query('UPDATE products SET slug = ?, name = ?, category = ?, subtitle = ?, summary = ?, target = ?, detail_label = ?, is_featured = ?, updated_at = ? WHERE slug = ?', array_merge($values, [$originalSlug]));
+    if ($existing) {
+        $conn->query('UPDATE products SET slug = ?, name = ?, category = ?, subtitle = ?, summary = ?, target = ?, detail_label = ?, is_featured = ?, updated_at = ? WHERE id = ?', array_merge($values, [$originalId]));
     } else {
         $sortOrder = (int) $conn->only('SELECT COALESCE(MAX(sort_order), -1) + 1 FROM products');
         $conn->query('INSERT INTO products (slug, name, category, subtitle, summary, target, detail_label, is_featured, updated_at, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array_merge($values, [$sortOrder, $now]));
@@ -714,8 +922,41 @@ Route::get('(:package)/management', function () {
     return view('admin::management', [
         'title' => 'Pengurus',
         'active' => 'management',
-        'management' => admin_get_management(),
+        'management' => admin_list_management(),
         'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/management/create', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    return view('admin::management-form', [
+        'title' => 'Tambah Pengurus',
+        'active' => 'management',
+        'person' => null,
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/management/(:num)/edit', function ($id) {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    $person = admin_find_management($id);
+
+    if (! $person) {
+        \System\Session::flash('admin_error', 'Data pengurus tidak ditemukan.');
+        return redirect('admin/management');
+    }
+
+    return view('admin::management-form', [
+        'title' => 'Edit Pengurus',
+        'active' => 'management',
+        'person' => $person,
         'error' => \System\Session::get('admin_error'),
     ]);
 });
@@ -737,9 +978,11 @@ Route::post('(:package)/management', function () {
     $group = text_limit(admin_post_value('group'), 80);
     $initials = text_limit(admin_post_value('initials'), 10);
 
+    $formUrl = $originalId > 0 ? 'admin/management/'.$originalId.'/edit' : 'admin/management/create';
+
     if ($name === '' || $position === '' || $group === '') {
         \System\Session::flash('admin_error', 'Nama, jabatan, dan kelompok pengurus wajib diisi.');
-        return redirect('admin/management');
+        return redirect($formUrl);
     }
     $existing = $originalId > 0 ? $conn->first('SELECT * FROM management WHERE id = ? LIMIT 1', [$originalId]) : null;
     $photoPath = $existing ? (string) $existing->photo_path : '';
@@ -758,7 +1001,7 @@ Route::post('(:package)/management', function () {
         }
     } catch (\Exception $e) {
         \System\Session::flash('admin_error', $e->getMessage());
-        return redirect('admin/management');
+        return redirect($formUrl);
     }
 
     $person = [
@@ -805,6 +1048,99 @@ Route::post('(:package)/management/delete', function () {
     return redirect('admin/management');
 });
 
+function admin_news_upload_dir()
+{
+    return path('assets').'uploads'.DS.'news';
+}
+
+function admin_store_news_upload($key = 'file')
+{
+    if (empty($_FILES[$key]) || ! isset($_FILES[$key]['error'])) {
+        throw new \Exception('Tidak ada file yang diunggah.');
+    }
+
+    $error = (int) $_FILES[$key]['error'];
+
+    if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
+        throw new \Exception('Ukuran file melebihi batas server (maksimal sekitar 2MB).');
+    }
+
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        throw new \Exception('Tidak ada file yang dipilih.');
+    }
+
+    if ($error !== UPLOAD_ERR_OK) {
+        throw new \Exception('File gagal diunggah. Silakan coba lagi.');
+    }
+
+    $size = (int) $_FILES[$key]['size'];
+
+    if ($size <= 0) {
+        throw new \Exception('File tidak valid atau kosong.');
+    }
+
+    if ($size > 2 * 1024 * 1024) {
+        throw new \Exception('Ukuran file maksimal 2MB.');
+    }
+
+    $tmp = (string) $_FILES[$key]['tmp_name'];
+
+    if (! is_uploaded_file($tmp)) {
+        throw new \Exception('File tidak valid.');
+    }
+
+    $original = (string) $_FILES[$key]['name'];
+    $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+    $imageTypes = [
+        'jpg' => IMAGETYPE_JPEG,
+        'jpeg' => IMAGETYPE_JPEG,
+        'png' => IMAGETYPE_PNG,
+        'webp' => IMAGETYPE_WEBP,
+        'gif' => IMAGETYPE_GIF,
+    ];
+
+    $type = null;
+    $storedExtension = null;
+    $info = @getimagesize($tmp);
+
+    if ($info && isset($imageTypes[$extension]) && $imageTypes[$extension] === $info[2]) {
+        $type = 'image';
+        $storedExtension = ($extension === 'jpeg') ? 'jpg' : $extension;
+    } elseif ($extension === 'pdf') {
+        $mime = class_exists('finfo') ? (new \finfo(FILEINFO_MIME_TYPE))->file($tmp) : '';
+        $head = (string) @file_get_contents($tmp, false, null, 0, 5);
+
+        if ($mime === 'application/pdf' && strncmp($head, '%PDF-', 5) === 0) {
+            $type = 'pdf';
+            $storedExtension = 'pdf';
+        }
+    }
+
+    if ($type === null) {
+        throw new \Exception('Tipe file tidak didukung. Gunakan gambar (JPG, PNG, WEBP, GIF) atau PDF.');
+    }
+
+    $dir = admin_news_upload_dir();
+
+    if (! is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+
+    $filename = 'berita-'.date('YmdHis').'-'.bin2hex(random_bytes(4)).'.'.$storedExtension;
+    $target = $dir.DS.$filename;
+
+    if (! move_uploaded_file($tmp, $target)) {
+        throw new \Exception('File gagal disimpan. Periksa permission folder upload.');
+    }
+
+    return [
+        'type' => $type,
+        'name' => $original,
+        'path' => 'uploads/news/'.$filename,
+        'url' => asset('uploads/news/'.$filename),
+    ];
+}
+
 function admin_news_filters()
 {
     $page = max(1, (int) \System\Input::get('page', 1));
@@ -816,11 +1152,12 @@ function admin_get_news(array $filters)
 {
     try {
         $offset = max(0, ($filters['page'] - 1) * $filters['perPage']);
-        $rows = \System\Database::connection()->query('SELECT slug, title, category, summary, content, is_published, published_at FROM news ORDER BY published_at DESC, id DESC LIMIT '.(int) $filters['perPage'].' OFFSET '.(int) $offset);
+        $rows = \System\Database::connection()->query('SELECT id, slug, title, category, summary, content, is_published, published_at FROM news ORDER BY published_at DESC, id DESC LIMIT '.(int) $filters['perPage'].' OFFSET '.(int) $offset);
         $news = [];
 
         foreach ($rows as $row) {
             $news[] = [
+                'id' => (int) $row->id,
                 'slug' => $row->slug,
                 'title' => $row->title,
                 'category' => $row->category,
@@ -837,6 +1174,32 @@ function admin_get_news(array $filters)
     } catch (\Exception $e) {
         return [];
     }
+}
+
+function admin_find_news_by_id($id)
+{
+    try {
+        $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, is_published, published_at FROM news WHERE id = ? LIMIT 1', [(int) $id]);
+    } catch (\Throwable $e) {
+        return null;
+    } catch (\Exception $e) {
+        return null;
+    }
+
+    if (! $row) {
+        return null;
+    }
+
+    return [
+        'id' => (int) $row->id,
+        'slug' => $row->slug,
+        'title' => $row->title,
+        'category' => $row->category,
+        'summary' => $row->summary,
+        'content' => $row->content,
+        'is_published' => (bool) $row->is_published,
+        'published_at' => $row->published_at,
+    ];
 }
 
 function admin_count_news()
@@ -885,6 +1248,64 @@ Route::get('(:package)/news', function () {
     ]);
 });
 
+Route::get('(:package)/news/create', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    return view('admin::news-form', [
+        'title' => 'Tambah Berita',
+        'active' => 'news',
+        'item' => null,
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::get('(:package)/news/(:num)/edit', function ($id) {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    $item = admin_find_news_by_id($id);
+
+    if (! $item) {
+        \System\Session::flash('admin_error', 'Berita tidak ditemukan.');
+        return redirect('admin/news');
+    }
+
+    return view('admin::news-form', [
+        'title' => 'Edit Berita',
+        'active' => 'news',
+        'item' => $item,
+        'error' => \System\Session::get('admin_error'),
+    ]);
+});
+
+Route::post('(:package)/news/upload', function () {
+    if ($redirect = admin_require_auth()) {
+        return $redirect;
+    }
+
+    if ($redirect = admin_require_csrf('admin/news')) {
+        return $redirect;
+    }
+
+    try {
+        $file = admin_store_news_upload('file');
+
+        return \System\Response::json([
+            'ok' => true,
+            'type' => $file['type'],
+            'name' => $file['name'],
+            'url' => $file['url'],
+        ]);
+    } catch (\Throwable $e) {
+        return \System\Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
+    } catch (\Exception $e) {
+        return \System\Response::json(['ok' => false, 'error' => $e->getMessage()], 422);
+    }
+});
+
 Route::post('(:package)/news', function () {
     if ($redirect = admin_require_auth()) {
         return $redirect;
@@ -897,7 +1318,7 @@ Route::post('(:package)/news', function () {
     $conn = \System\Database::connection();
     $now = date('Y-m-d H:i:s');
     $page = max(1, (int) \System\Input::get('page', 1));
-    $originalSlug = text_limit(\System\Input::get('original_slug'), 160);
+    $originalId = (int) admin_post_value('original_id');
     $title = text_limit(\System\Input::get('title'), 190);
     $slug = admin_news_slug(\System\Input::get('slug'), $title);
     $category = text_limit(\System\Input::get('category'), 120);
@@ -905,22 +1326,23 @@ Route::post('(:package)/news', function () {
     $content = text_limit(\System\Input::get('content'), 50000);
     $isPublished = (bool) \System\Input::get('is_published');
     $redirectTo = $page > 1 ? 'admin/news?page='.$page : 'admin/news';
+    $formUrl = $originalId > 0 ? 'admin/news/'.$originalId.'/edit' : 'admin/news/create';
 
     if ($title === '') {
         \System\Session::flash('admin_error', 'Judul berita wajib diisi.');
-        return redirect($redirectTo);
+        return redirect($formUrl);
     }
 
     try {
-        $bindings = $originalSlug !== '' ? [$slug, $originalSlug] : [$slug];
-        $checkSlug = $originalSlug !== '' ? 'SELECT COUNT(*) FROM news WHERE slug = ? AND slug != ?' : 'SELECT COUNT(*) FROM news WHERE slug = ?';
+        $bindings = $originalId > 0 ? [$slug, $originalId] : [$slug];
+        $checkSlug = $originalId > 0 ? 'SELECT COUNT(*) FROM news WHERE slug = ? AND id != ?' : 'SELECT COUNT(*) FROM news WHERE slug = ?';
 
         if ((int) $conn->only($checkSlug, $bindings) > 0) {
             \System\Session::flash('admin_error', 'Slug "'.$slug.'" sudah dipakai berita lain. Gunakan slug yang berbeda.');
-            return redirect($redirectTo);
+            return redirect($formUrl);
         }
 
-        $existing = $originalSlug !== '' ? $conn->first('SELECT id, published_at FROM news WHERE slug = ? LIMIT 1', [$originalSlug]) : null;
+        $existing = $originalId > 0 ? $conn->first('SELECT id, published_at FROM news WHERE id = ? LIMIT 1', [$originalId]) : null;
         $publishedAt = $existing ? $existing->published_at : null;
 
         if ($isPublished) {
@@ -944,8 +1366,10 @@ Route::post('(:package)/news', function () {
         \System\Session::flash('admin_success', 'Berita berhasil disimpan.');
     } catch (\Throwable $e) {
         \System\Session::flash('admin_error', 'Gagal menyimpan berita. Periksa database dan skema tabel news.');
+        return redirect($formUrl);
     } catch (\Exception $e) {
         \System\Session::flash('admin_error', 'Gagal menyimpan berita. Periksa database dan skema tabel news.');
+        return redirect($formUrl);
     }
 
     return redirect($redirectTo);

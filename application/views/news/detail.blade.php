@@ -36,7 +36,11 @@
         <div class="space-y-8 lg:col-span-2">
             <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10 sm:p-10">
                 <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ $item['title'] }}</h2>
-                <div class="mt-6 whitespace-pre-line leading-8 text-slate-700">{{ $item['content'] }}</div>
+                @php
+                    $body = trim((string) $item['content']);
+                    $bodyIsHtml = $body !== strip_tags($body);
+                @endphp
+                <div class="mt-6 leading-8 text-slate-700 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-lg [&_h3]:font-bold [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-blue-200 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-slate-200">{!! $bodyIsHtml ? $body : nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8')) !!}</div>
             </article>
 
             <div class="rounded-3xl border border-blue-100 bg-blue-50 p-6">
