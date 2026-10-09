@@ -1,6 +1,7 @@
 @layout('layouts.app')
 
 @php
+    $settings = public_settings();
     $news = public_news();
 @endphp
 
@@ -10,7 +11,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
         <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Berita & Pengumuman</p>
         <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">Informasi terbaru dari BPR</h1>
-        <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Halaman ini menampilkan berita dan pengumuman PT BPR Karawang Jabar (Perseroda) yang dikelola dari admin panel.</p>
+        <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Halaman ini menampilkan berita dan pengumuman {{ $settings['company_name'] }} yang dikelola dari database melalui admin panel.</p>
     </div>
 </section>
 

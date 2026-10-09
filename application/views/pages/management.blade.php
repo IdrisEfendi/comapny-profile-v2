@@ -1,6 +1,7 @@
 @layout('layouts.app')
 
 @php
+    $settings = public_settings();
     $directors = public_management_by_group('Direksi');
     $commissioners = public_management_by_group('Komisaris');
 @endphp
@@ -11,8 +12,8 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative grid gap-10 lg:grid-cols-2 lg:items-end">
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Pengurus</p>
-            <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">Direksi dan Komisaris PT BPR Karawang Jabar</h1>
-            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Informasi pengurus ditampilkan dari data admin untuk mendukung transparansi profil PT BPR Karawang Jabar (Perseroda).</p>
+            <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">Direksi dan Komisaris {{ $settings['company_name'] }}</h1>
+            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Informasi pengurus ditampilkan dari database untuk mendukung transparansi profil {{ $settings['company_name'] }}.</p>
         </div>
         <div class="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
             <p class="text-sm font-semibold text-blue-100">Komposisi Pengurus</p>
@@ -105,7 +106,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Butuh Informasi Resmi?</p>
-            <h2 class="mt-3 text-3xl font-bold tracking-tight">Hubungi PT BPR Karawang Jabar</h2>
+            <h2 class="mt-3 text-3xl font-bold tracking-tight">Hubungi {{ $settings['company_name'] }}</h2>
             <p class="mt-3 max-w-2xl text-blue-100">Untuk konfirmasi struktur pengurus atau informasi perusahaan, gunakan kanal kontak resmi.</p>
         </div>
         <a href="{{ url('kontak') }}" class="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-900 hover:bg-blue-50">Ke Halaman Kontak</a>

@@ -1,6 +1,7 @@
 @layout('layouts.app')
 
 @php
+    $settings = public_settings();
     $products = public_products();
     $featuredProduct = public_featured_product();
 @endphp
@@ -12,7 +13,7 @@
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Produk & Layanan</p>
             <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">Informasi produk BPR yang mudah dipahami</h1>
-            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Halaman ini menampilkan produk dan layanan PT BPR Karawang Jabar (Perseroda) dari data admin secara rapi, jelas, dan aman dari klaim yang belum terverifikasi.</p>
+            <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Halaman ini menampilkan produk dan layanan {{ $settings['company_name'] }} dari database secara rapi, jelas, dan aman dari klaim yang belum terverifikasi.</p>
         </div>
         @if ($featuredProduct)
             <div class="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
