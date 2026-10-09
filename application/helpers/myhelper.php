@@ -39,8 +39,7 @@ if (! function_exists('text_limit')) {
 
 if (! function_exists('public_default_settings')) {
     /**
-     * Default data website public. Disamakan dengan default admin agar public tetap aman
-     * ketika file storage/admin/settings.json belum tersedia atau rusak.
+     * Default data website public jika database belum tersedia atau bermasalah.
      */
     function public_default_settings()
     {

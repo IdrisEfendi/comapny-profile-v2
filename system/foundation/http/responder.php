@@ -92,7 +92,7 @@ class Responder
         $this->setProtocolVersion('1.0');
 
         if (! $this->headers->has('Date')) {
-            $this->setDate(new \DateTime(null, new \DateTimeZone('UTC')));
+            $this->setDate(new \DateTime('now', new \DateTimeZone('UTC')));
         }
     }
 

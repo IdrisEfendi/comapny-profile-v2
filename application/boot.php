@@ -15,6 +15,7 @@ defined('DS') or exit('No direct script access.');
 */
 
 ini_set('display_errors', 'Off');
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
 /*
 |--------------------------------------------------------------------------

@@ -174,7 +174,7 @@ $response->render();
 |
 */
 
-if ('' !== trim(Config::get('session.driver'))) {
+if (! Request::cli() && '' !== trim(Config::get('session.driver'))) {
     Session::save();
 }
 
