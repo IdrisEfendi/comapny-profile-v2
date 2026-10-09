@@ -1,5 +1,6 @@
 /.env
 /.htaccess
+/node_modules/
 /storage/cache/*
 /storage/logs/*
 /storage/sessions/*
