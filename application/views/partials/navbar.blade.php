@@ -22,7 +22,11 @@
         <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between py-4">
                 <a href="{{ url('/') }}" class="flex min-w-0 items-center gap-3">
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-bold text-blue-800 shadow-lg shadow-slate-900/10">BPR</span>
+                    @if (! empty($settings['logo_path']))
+                        <img src="{{ asset($settings['logo_path']) }}" alt="Logo {{ $settings['company_name'] }}" class="h-11 w-11 shrink-0 rounded-2xl bg-white object-contain p-1 shadow-lg shadow-slate-900/10">
+                    @else
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-bold text-blue-800 shadow-lg shadow-slate-900/10">BPR</span>
+                    @endif
                     <span class="min-w-0">
                         <span class="block truncate text-sm font-bold leading-tight text-white sm:text-base">{{ $settings['company_name'] }}</span>
                         <span class="block text-xs text-blue-100">{{ $settings['tagline'] }}</span>

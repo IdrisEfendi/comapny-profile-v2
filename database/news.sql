@@ -1,4 +1,5 @@
--- Schema untuk fitur Berita & Pengumuman (Company Profile v2)
+-- Schema untuk fitur Berita & Pengumuman (Company Profile v2).
+-- Untuk instalasi baru, gunakan database/schema.sql yang memuat seluruh tabel.
 --
 -- Dijalankan sekali pada environment yang belum memiliki tabel `news`.
 -- Contoh: mysql -u <user> -p <nama_database> < database/news.sql
@@ -10,6 +11,8 @@ CREATE TABLE IF NOT EXISTS `news` (
   `category` varchar(120) NOT NULL DEFAULT '',
   `summary` text NOT NULL,
   `content` longtext NOT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `pdf_path` varchar(255) DEFAULT NULL,
   `is_published` tinyint(1) NOT NULL DEFAULT '1',
   `published_at` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,

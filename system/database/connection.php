@@ -207,9 +207,9 @@ class Connection
     protected function execute($sql, $bindings = [])
     {
         $bindings = (array) $bindings;
-        $bindings = array_filter($bindings, function ($binding) {
-            return (! ($binding instanceof Expression));
-        });
+        $bindings = array_values(array_filter($bindings, function ($binding) {
+            return ! ($binding instanceof Expression);
+        }, ARRAY_FILTER_USE_BOTH));
 
         $bindings = array_values($bindings);
         $sql = $this->grammar()->shortcut($sql, $bindings);

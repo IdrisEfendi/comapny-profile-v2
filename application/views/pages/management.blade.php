@@ -34,7 +34,14 @@
         </div>
 
         <div class="mt-12 grid gap-6 md:grid-cols-2">
-            @foreach ($directors as $index => $person)
+            @if (count($directors) === 0)
+                <div class="md:col-span-2 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+                    <h3 class="text-xl font-bold text-slate-950">Data direksi belum tersedia</h3>
+                    <p class="mt-3 leading-7 text-slate-600">Informasi direksi akan ditampilkan setelah dimasukkan melalui panel admin.</p>
+                    <a href="{{ url('kontak') }}" class="mt-6 inline-flex rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white hover:bg-blue-950">Hubungi Kami</a>
+                </div>
+            @else
+                @foreach ($directors as $index => $person)
                 <article class="rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
                     <div class="{{ $index % 2 === 0 ? 'bg-gradient-to-br from-blue-900 to-blue-700' : 'bg-gradient-to-br from-slate-900 to-blue-800' }} p-8 text-white">
                         @if (! empty($person['photo_path']))
@@ -53,7 +60,8 @@
                         </div>
                     </div>
                 </article>
-            @endforeach
+                @endforeach
+            @endif
         </div>
     </div>
 </section>
@@ -67,7 +75,14 @@
         </div>
 
         <div class="mt-12 grid gap-6 md:grid-cols-2">
-            @foreach ($commissioners as $person)
+            @if (count($commissioners) === 0)
+                <div class="md:col-span-2 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+                    <h3 class="text-xl font-bold text-slate-950">Data komisaris belum tersedia</h3>
+                    <p class="mt-3 leading-7 text-slate-600">Informasi komisaris akan ditampilkan setelah dimasukkan melalui panel admin.</p>
+                    <a href="{{ url('kontak') }}" class="mt-6 inline-flex rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white hover:bg-blue-950">Hubungi Kami</a>
+                </div>
+            @else
+                @foreach ($commissioners as $person)
                 <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                     <div class="flex items-start gap-5">
                         @if (! empty($person['photo_path']))
@@ -82,7 +97,8 @@
                         </div>
                     </div>
                 </article>
-            @endforeach
+                @endforeach
+            @endif
         </div>
     </div>
 </section>

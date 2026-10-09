@@ -53,6 +53,7 @@ if (! function_exists('public_default_settings')) {
             'whatsapp' => '',
             'google_maps_url' => '',
             'notification_email' => '',
+            'logo_path' => '',
         ];
     }
 }
@@ -241,7 +242,7 @@ if (! function_exists('public_news')) {
         }
 
         try {
-            $rows = \System\Database::connection()->query('SELECT slug, title, category, summary, published_at FROM news WHERE is_published = 1 ORDER BY published_at DESC, id DESC');
+            $rows = \System\Database::connection()->query('SELECT slug, title, category, summary, published_at, image_path, pdf_path FROM news WHERE is_published = 1 ORDER BY published_at DESC, id DESC');
             $news = [];
 
             foreach ($rows as $row) {
@@ -251,6 +252,8 @@ if (! function_exists('public_news')) {
                     'category' => $row->category,
                     'summary' => $row->summary,
                     'published_at' => $row->published_at,
+                    'image_path' => $row->image_path,
+                    'pdf_path' => $row->pdf_path,
                 ];
             }
 
@@ -277,7 +280,7 @@ if (! function_exists('public_news_by_slug')) {
         }
 
         try {
-            $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, published_at FROM news WHERE slug = ? AND is_published = 1 LIMIT 1', [$slug]);
+            $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, published_at, image_path, pdf_path FROM news WHERE slug = ? AND is_published = 1 LIMIT 1', [$slug]);
 
             if (! $row) {
                 return null;
@@ -291,6 +294,8 @@ if (! function_exists('public_news_by_slug')) {
                 'summary' => $row->summary,
                 'content' => $row->content,
                 'published_at' => $row->published_at,
+                'image_path' => $row->image_path,
+                'pdf_path' => $row->pdf_path,
             ];
         } catch (\Throwable $e) {
             return null;

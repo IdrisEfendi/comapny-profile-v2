@@ -4,8 +4,11 @@
 @if (! empty($success))
     <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{{ $success }}</div>
 @endif
+@if (! empty($error))
+    <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{{ $error }}</div>
+@endif
 
-<form action="{{ url('admin/settings') }}" method="post" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
+<form action="{{ url('admin/settings') }}" method="post" enctype="multipart/form-data" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/5">
     @php echo csrf_field(); @endphp
     <div class="grid gap-6 lg:grid-cols-2">
         <div>
@@ -15,6 +18,17 @@
         <div>
             <label class="block text-sm font-semibold text-slate-700" for="tagline">Tagline</label>
             <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="tagline" name="tagline" type="text" value="{{ $settings['tagline'] }}">
+        </div>
+        <div class="lg:col-span-2">
+            <label class="block text-sm font-semibold text-slate-700" for="logo">Logo Website</label>
+            @if (! empty($settings['logo_path']))
+                <div class="mt-3 flex items-center gap-4 rounded-2xl bg-slate-50 p-4">
+                    <img src="{{ asset($settings['logo_path']) }}" alt="Logo website" class="h-16 w-16 rounded-2xl object-contain bg-white p-2 shadow-sm">
+                    <p class="text-sm text-slate-600">Logo saat ini digunakan pada navbar dan footer website.</p>
+                </div>
+            @endif
+            <input class="mt-3 block w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" id="logo" name="logo" type="file" accept="image/jpeg,image/png,image/webp">
+            <p class="mt-2 text-xs text-slate-500">Format JPG, PNG, atau WEBP. Maksimal 2MB.</p>
         </div>
         <div>
             <label class="block text-sm font-semibold text-slate-700" for="phone">Telepon</label>

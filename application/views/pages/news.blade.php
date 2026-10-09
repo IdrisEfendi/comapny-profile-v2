@@ -32,6 +32,9 @@
                         $detailUrl = url('berita/'.$item['slug']);
                     @endphp
                     <article class="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+                        @if (! empty($item['image_path']))
+                            <img src="{{ asset($item['image_path']) }}" alt="{{ $item['title'] }}" class="h-56 w-full object-cover">
+                        @endif
                         <div class="bg-gradient-to-br from-blue-900 to-blue-700 p-8 text-white">
                             <div class="flex flex-wrap items-center gap-3">
                                 @if ($item['category'] !== '')

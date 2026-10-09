@@ -6,6 +6,7 @@
     $pageDescription = (isset($description) && $description !== '') ? $description : $siteName.', '.$siteTagline.'.';
     $pageUrl = \System\URL::current();
     $ogType = isset($og_type) ? $og_type : 'website';
+    $ogImage = isset($og_image) && $og_image !== '' ? $og_image : (! empty($siteSettings['logo_path']) ? asset($siteSettings['logo_path']) : '');
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -20,10 +21,14 @@
     <meta property="og:description" content="{{ $pageDescription }}">
     <meta property="og:url" content="{{ $pageUrl }}">
     <meta property="og:locale" content="id_ID">
+    @if ($ogImage !== '')
+        <meta property="og:image" content="{{ $ogImage }}">
+        <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ $pageTitle }}">
     <meta name="twitter:description" content="{{ $pageDescription }}">
-    <link rel="icon" type="image/png" href="data:;base64,iVBORw0KGgo=">
+    <link rel="icon" type="image/png" href="{{ $ogImage !== '' ? $ogImage : 'data:;base64,iVBORw0KGgo=' }}">
     <title>{{ $pageTitle }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     @yield('head')

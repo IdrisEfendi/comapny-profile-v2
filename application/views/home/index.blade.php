@@ -43,18 +43,32 @@
                 <a href="{{ url('kontak') }}" class="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-900 shadow-lg shadow-slate-900/10 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-950">Hubungi Kami</a>
                 <a href="{{ url('produk-layanan') }}" class="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:border-white/40 hover:bg-white/10">Lihat Produk</a>
             </div>
-            <div class="mt-10 grid max-w-2xl gap-4 sm:grid-cols-3">
-                <div class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <p class="text-2xl font-bold text-white">{{ preg_match('/\d{2}:\d{2}/', $jsonLdSettings['office_hours'], $time) ? $time[0] : '-' }}</p>
-                    <p class="mt-1 text-sm text-slate-300">Mulai layanan</p>
-                </div>
-                <div class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <p class="text-2xl font-bold text-white">{{ $homeProduct['name'] ?? '-' }}</p>
-                    <p class="mt-1 text-sm text-slate-300">Produk awal</p>
-                </div>
-                <div class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <p class="text-2xl font-bold text-white">{{ $homeProfile['area_service'] }}</p>
-                    <p class="mt-1 text-sm text-slate-300">Area layanan</p>
+            <div class="mt-10 max-w-2xl overflow-hidden rounded-3xl border border-white/15 bg-white/[0.08] shadow-2xl shadow-slate-950/20 backdrop-blur">
+                <div class="grid divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                    <div class="p-5 sm:p-6">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-300 text-sm font-black text-slate-950">01</span>
+                            <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Jam layanan</p>
+                        </div>
+                        <p class="mt-5 text-2xl font-bold tracking-tight text-white">{{ preg_match('/\d{2}:\d{2}/', $jsonLdSettings['office_hours'], $time) ? $time[0] : '-' }}</p>
+                        <p class="mt-1 text-sm text-slate-300">Mulai operasional</p>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-200 text-sm font-black text-blue-950">02</span>
+                            <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Produk utama</p>
+                        </div>
+                        <p class="mt-5 truncate text-2xl font-bold tracking-tight text-white">{{ $homeProduct['name'] ?? '-' }}</p>
+                        <p class="mt-1 truncate text-sm text-slate-300">{{ $homeProduct['subtitle'] ?? 'Informasi produk' }}</p>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-200 text-sm font-black text-emerald-950">03</span>
+                            <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Cakupan</p>
+                        </div>
+                        <p class="mt-5 line-clamp-2 text-lg font-bold leading-snug tracking-tight text-white">{{ $homeProfile['area_service'] }}</p>
+                        <p class="mt-1 text-sm text-slate-300">Area layanan</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,7 +110,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-12 lg:grid-cols-2 lg:items-center">
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Tentang Kami</p>
-            <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">BPR daerah yang dekat dengan masyarakat Karawang</h2>
+             <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">{{ $homeProfile['profile_heading'] }}</h2>
              <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">{{ $homeProfile['profile_summary'] }}</p>
             <a href="{{ url('tentang-kami') }}" class="inline-flex items-center justify-center rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-blue-950 mt-8">Pelajari Profil</a>
         </div>
@@ -104,17 +118,17 @@
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">01</div>
                 <h3 class="mt-5 text-lg font-bold text-slate-950">Lokal & Dekat</h3>
-                <p class="mt-3 text-sm leading-6 text-slate-600">Berorientasi pada kebutuhan masyarakat Karawang dan area sekitar Cilamaya.</p>
+                 <p class="mt-3 text-sm leading-6 text-slate-600">{{ $homeProfile['area_service'] }}</p>
             </div>
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">02</div>
                 <h3 class="mt-5 text-lg font-bold text-slate-950">Informasi Terbuka</h3>
-                <p class="mt-3 text-sm leading-6 text-slate-600">Pengurus, produk awal, alamat, telepon, email, dan jam layanan ditampilkan jelas.</p>
+                 <p class="mt-3 text-sm leading-6 text-slate-600">{{ $homeProfile['information_focus'] }}</p>
             </div>
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">03</div>
                 <h3 class="mt-5 text-lg font-bold text-slate-950">Mudah Dihubungi</h3>
-                <p class="mt-3 text-sm leading-6 text-slate-600">Pengunjung diarahkan ke kanal kontak resmi untuk memperoleh informasi lebih lanjut.</p>
+                 <p class="mt-3 text-sm leading-6 text-slate-600">{{ $homeProduct['detail_label'] ?? 'Hubungi kantor untuk informasi lebih lanjut.' }}</p>
             </div>
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">04</div>
@@ -139,7 +153,7 @@
         <div class="mt-10 grid gap-6 lg:grid-cols-2">
             <article class="rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-900 to-blue-700 p-8 text-white shadow-lg shadow-slate-900/10">
                 <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-xl font-bold text-blue-800">T</div>
-                <p class="mt-8 text-sm font-semibold text-blue-100">Tabungan Hari Raya</p>
+                 <p class="mt-8 text-sm font-semibold text-blue-100">{{ $homeProduct['subtitle'] ?? 'Produk dan layanan' }}</p>
                  <h3 class="mt-2 text-3xl font-bold">{{ $homeProduct['name'] ?? 'Produk' }}</h3>
                  <p class="mt-4 max-w-2xl leading-7 text-blue-50">{{ $homeProduct['summary'] ?? 'Belum ada produk unggulan.' }}</p>
                  @if ($homeProduct)
@@ -148,7 +162,7 @@
             </article>
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10">
                 <h3 class="text-xl font-bold text-slate-950">Informasi Produk</h3>
-                <p class="mt-4 leading-7 text-slate-600">Informasi produk keuangan disajikan secara ringkas dan hati-hati agar pengunjung mendapatkan arahan yang jelas sebelum menghubungi BPR.</p>
+                 <p class="mt-4 leading-7 text-slate-600">{{ $homeProduct['detail_label'] ?? 'Informasi produk akan tersedia melalui database.' }}</p>
                 <div class="mt-6 rounded-2xl bg-amber-50 p-5 text-sm leading-6 text-amber-900">Untuk detail manfaat, syarat, biaya, dan ketentuan, silakan hubungi kantor BPR pada jam layanan.</div>
             </div>
         </div>
@@ -163,9 +177,16 @@
             <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600 mx-auto">Informasi pengurus ditampilkan untuk mendukung transparansi profil PT BPR Karawang Jabar (Perseroda).</p>
         </div>
         <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach (array_slice($homeManagement, 0, 4) as $person)
+            @if (count($homeManagement) === 0)
+                <div class="sm:col-span-2 lg:col-span-4 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
+                    <h3 class="text-xl font-bold text-slate-950">Data pengurus belum tersedia</h3>
+                    <p class="mt-3 leading-7 text-slate-600">Informasi direksi dan komisaris akan ditampilkan setelah tersedia di database.</p>
+                </div>
+            @else
+                @foreach (array_slice($homeManagement, 0, 4) as $person)
                 <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10 text-center"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{{ $person['initials'] }}</div><p class="mt-5 font-bold text-slate-950">{{ $person['name'] }}</p><p class="mt-2 text-sm text-slate-500">{{ $person['position'] }}</p></div>
-            @endforeach
+                @endforeach
+            @endif
         </div>
         <div class="mt-10 text-center">
             <a href="{{ url('pengurus') }}" class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:border-blue-700 hover:text-blue-800">Lihat Halaman Pengurus</a>

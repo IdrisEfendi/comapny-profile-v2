@@ -6,7 +6,7 @@
 
 @section('content')
 @php
-    $n = $item ? $item : ['id' => null, 'slug' => '', 'title' => '', 'category' => '', 'summary' => '', 'content' => '', 'is_published' => true, 'published_at' => null];
+    $n = $item ? $item : ['id' => null, 'slug' => '', 'title' => '', 'category' => '', 'summary' => '', 'content' => '', 'image_path' => '', 'pdf_path' => '', 'is_published' => true, 'published_at' => null];
     $isEdit = $item ? true : false;
 @endphp
 
@@ -19,7 +19,7 @@
         <p class="text-sm font-bold uppercase tracking-widest text-blue-700">{{ $isEdit ? 'Edit Berita' : 'Tambah Berita' }}</p>
         <h2 class="mt-2 text-2xl font-bold tracking-tight text-slate-950">{{ $isEdit ? 'Perbarui berita' : 'Berita baru' }}</h2>
 
-        <form action="{{ url('admin/news') }}" method="post" class="mt-8 space-y-5">
+        <form action="{{ url('admin/news') }}" method="post" enctype="multipart/form-data" class="mt-8 space-y-5">
             @php echo csrf_field(); @endphp
 
             @if ($isEdit)
@@ -56,6 +56,25 @@
                 </div>
                 <textarea class="hidden" name="content" id="content-input">{{ $n['content'] }}</textarea>
                 <p class="mt-2 text-xs text-slate-500">Gunakan toolbar untuk memformat teks.</p>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700">Gambar Berita</label>
+                    @if (! empty($n['image_path']))
+                        <img src="{{ asset($n['image_path']) }}" alt="Gambar {{ $n['title'] }}" class="mt-3 h-32 w-full rounded-2xl object-cover">
+                    @endif
+                    <input class="mt-3 block w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="mt-2 text-xs text-slate-500">JPG, PNG, WEBP, atau GIF. Maksimal 2MB.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700">Lampiran PDF</label>
+                    @if (! empty($n['pdf_path']))
+                        <a href="{{ asset($n['pdf_path']) }}" target="_blank" rel="noopener" class="mt-3 inline-flex rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">Lihat PDF saat ini</a>
+                    @endif
+                    <input class="mt-3 block w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm" name="pdf" type="file" accept="application/pdf">
+                    <p class="mt-2 text-xs text-slate-500">PDF maksimal 2MB.</p>
+                </div>
             </div>
 
             <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>

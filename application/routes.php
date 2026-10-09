@@ -70,6 +70,7 @@ Route::get('berita/(:any)', function ($slug) {
         'item' => $item,
         'description' => text_limit($item['summary'], 160),
         'og_type' => 'article',
+        'og_image' => ! empty($item['image_path']) ? asset($item['image_path']) : '',
     ]);
 });
 

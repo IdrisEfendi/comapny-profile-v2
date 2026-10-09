@@ -194,7 +194,56 @@ function admin_default_settings()
         'whatsapp' => '',
         'google_maps_url' => '',
         'notification_email' => '',
+        'logo_path' => '',
     ];
+}
+
+function admin_settings_upload_dir()
+{
+    return path('assets').'uploads'.DS.'branding';
+}
+
+function admin_store_logo_upload($key = 'logo')
+{
+    if (empty($_FILES[$key]) || (int) $_FILES[$key]['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    $file = $_FILES[$key];
+    if ((int) $file['error'] !== UPLOAD_ERR_OK || (int) $file['size'] <= 0 || (int) $file['size'] > 2 * 1024 * 1024) {
+        throw new \Exception('Logo gagal diunggah atau melebihi ukuran maksimal 2MB.');
+    }
+
+    $info = @getimagesize($file['tmp_name']);
+    $types = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
+    if (! $info || ! isset($types[$info[2]]) || ! is_uploaded_file($file['tmp_name'])) {
+        throw new \Exception('Logo harus berupa JPG, PNG, atau WEBP yang valid.');
+    }
+
+    $dir = admin_settings_upload_dir();
+    if (! is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+
+    $filename = 'logo-'.date('YmdHis').'-'.bin2hex(random_bytes(4)).'.'.$types[$info[2]];
+    if (! move_uploaded_file($file['tmp_name'], $dir.DS.$filename)) {
+        throw new \Exception('Logo gagal disimpan. Periksa permission folder upload.');
+    }
+
+    return 'uploads/branding/'.$filename;
+}
+
+function admin_delete_logo_upload($path)
+{
+    $path = trim((string) $path);
+    if ($path === '' || strpos($path, 'uploads/branding/') !== 0) {
+        return;
+    }
+
+    $file = path('assets').str_replace('/', DS, $path);
+    if (is_file($file)) {
+        @unlink($file);
+    }
 }
 
 function admin_get_key_value_table($table, array $defaults)
@@ -539,6 +588,7 @@ Route::get('(:package)/account', function () {
         'currentId' => (int) \System\Session::get('admin_user_id', 0),
         'success' => \System\Session::get('admin_success'),
         'error' => \System\Session::get('admin_error'),
+        'error' => \System\Session::get('admin_error'),
     ]);
 });
 
@@ -742,6 +792,7 @@ Route::get('(:package)/settings', function () {
         'active' => 'settings',
         'settings' => admin_get_settings(),
         'success' => \System\Session::get('admin_success'),
+        'error' => \System\Session::get('admin_error'),
     ]);
 });
 
@@ -758,6 +809,23 @@ Route::post('(:package)/settings', function () {
 
     foreach (array_keys(admin_default_settings()) as $key) {
         $settings[$key] = text_limit(\System\Input::get($key), $key === 'address' ? 1000 : 190);
+    }
+
+    $current = admin_get_settings();
+    $settings['logo_path'] = $current['logo_path'] ?? '';
+
+    try {
+        $uploadedLogo = admin_store_logo_upload('logo');
+        if ($uploadedLogo) {
+            admin_delete_logo_upload($settings['logo_path']);
+            $settings['logo_path'] = $uploadedLogo;
+        }
+    } catch (\Throwable $e) {
+        \System\Session::flash('admin_error', $e->getMessage());
+        return redirect('admin/settings');
+    } catch (\Exception $e) {
+        \System\Session::flash('admin_error', $e->getMessage());
+        return redirect('admin/settings');
     }
 
     admin_save_settings($settings);
@@ -1053,9 +1121,13 @@ function admin_news_upload_dir()
     return path('assets').'uploads'.DS.'news';
 }
 
-function admin_store_news_upload($key = 'file')
+function admin_store_news_upload($key = 'file', $required = true)
 {
     if (empty($_FILES[$key]) || ! isset($_FILES[$key]['error'])) {
+        if (! $required) {
+            return null;
+        }
+
         throw new \Exception('Tidak ada file yang diunggah.');
     }
 
@@ -1066,6 +1138,10 @@ function admin_store_news_upload($key = 'file')
     }
 
     if ($error === UPLOAD_ERR_NO_FILE) {
+        if (! $required) {
+            return null;
+        }
+
         throw new \Exception('Tidak ada file yang dipilih.');
     }
 
@@ -1141,6 +1217,27 @@ function admin_store_news_upload($key = 'file')
     ];
 }
 
+function admin_log_news_error($exception)
+{
+    $message = $exception instanceof \Throwable ? $exception->getMessage() : (string) $exception;
+    error_log('[news] '.$message);
+}
+
+function admin_delete_news_upload($path)
+{
+    $path = trim((string) $path);
+
+    if ($path === '' || strpos($path, 'uploads/news/') !== 0) {
+        return;
+    }
+
+    $file = path('assets').str_replace('/', DS, $path);
+
+    if (is_file($file)) {
+        @unlink($file);
+    }
+}
+
 function admin_news_filters()
 {
     $page = max(1, (int) \System\Input::get('page', 1));
@@ -1152,7 +1249,7 @@ function admin_get_news(array $filters)
 {
     try {
         $offset = max(0, ($filters['page'] - 1) * $filters['perPage']);
-        $rows = \System\Database::connection()->query('SELECT id, slug, title, category, summary, content, is_published, published_at FROM news ORDER BY published_at DESC, id DESC LIMIT '.(int) $filters['perPage'].' OFFSET '.(int) $offset);
+        $rows = \System\Database::connection()->query('SELECT id, slug, title, category, summary, content, is_published, published_at, image_path, pdf_path FROM news ORDER BY published_at DESC, id DESC LIMIT '.(int) $filters['perPage'].' OFFSET '.(int) $offset);
         $news = [];
 
         foreach ($rows as $row) {
@@ -1165,6 +1262,8 @@ function admin_get_news(array $filters)
                 'content' => $row->content,
                 'is_published' => (bool) $row->is_published,
                 'published_at' => $row->published_at,
+                'image_path' => $row->image_path,
+                'pdf_path' => $row->pdf_path,
             ];
         }
 
@@ -1179,7 +1278,7 @@ function admin_get_news(array $filters)
 function admin_find_news_by_id($id)
 {
     try {
-        $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, is_published, published_at FROM news WHERE id = ? LIMIT 1', [(int) $id]);
+        $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, is_published, published_at, image_path, pdf_path FROM news WHERE id = ? LIMIT 1', [(int) $id]);
     } catch (\Throwable $e) {
         return null;
     } catch (\Exception $e) {
@@ -1199,6 +1298,8 @@ function admin_find_news_by_id($id)
         'content' => $row->content,
         'is_published' => (bool) $row->is_published,
         'published_at' => $row->published_at,
+        'image_path' => $row->image_path,
+        'pdf_path' => $row->pdf_path,
     ];
 }
 
@@ -1342,7 +1443,29 @@ Route::post('(:package)/news', function () {
             return redirect($formUrl);
         }
 
-        $existing = $originalId > 0 ? $conn->first('SELECT id, published_at FROM news WHERE id = ? LIMIT 1', [$originalId]) : null;
+        $existing = $originalId > 0 ? $conn->first('SELECT id, published_at, image_path, pdf_path FROM news WHERE id = ? LIMIT 1', [$originalId]) : null;
+        $imagePath = $existing ? (string) $existing->image_path : '';
+        $pdfPath = $existing ? (string) $existing->pdf_path : '';
+        $uploadedImage = admin_store_news_upload('image', false);
+        $uploadedPdf = admin_store_news_upload('pdf', false);
+
+        if ($uploadedImage && $uploadedImage['type'] !== 'image') {
+            throw new \Exception('File gambar tidak valid.');
+        }
+
+        if ($uploadedPdf && $uploadedPdf['type'] !== 'pdf') {
+            throw new \Exception('File PDF tidak valid.');
+        }
+
+        if ($uploadedImage) {
+            admin_delete_news_upload($imagePath);
+            $imagePath = $uploadedImage['path'];
+        }
+
+        if ($uploadedPdf) {
+            admin_delete_news_upload($pdfPath);
+            $pdfPath = $uploadedPdf['path'];
+        }
         $publishedAt = $existing ? $existing->published_at : null;
 
         if ($isPublished) {
@@ -1354,21 +1477,23 @@ Route::post('(:package)/news', function () {
         }
 
         if ($existing) {
-            $conn->query('UPDATE news SET slug = ?, title = ?, category = ?, summary = ?, content = ?, is_published = ?, published_at = ?, updated_at = ? WHERE id = ?', [
-                $slug, $title, $category, $summary, $content, $isPublished ? 1 : 0, $publishedAt, $now, $existing->id,
+            $conn->query('UPDATE news SET slug = ?, title = ?, category = ?, summary = ?, content = ?, image_path = ?, pdf_path = ?, is_published = ?, published_at = ?, updated_at = ? WHERE id = ?', [
+                $slug, $title, $category, $summary, $content, $imagePath, $pdfPath, $isPublished ? 1 : 0, $publishedAt, $now, $existing->id,
             ]);
         } else {
-            $conn->query('INSERT INTO news (slug, title, category, summary, content, is_published, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-                $slug, $title, $category, $summary, $content, $isPublished ? 1 : 0, $publishedAt, $now, $now,
+            $conn->query('INSERT INTO news (slug, title, category, summary, content, image_path, pdf_path, is_published, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $slug, $title, $category, $summary, $content, $imagePath, $pdfPath, $isPublished ? 1 : 0, $publishedAt, $now, $now,
             ]);
         }
 
         \System\Session::flash('admin_success', 'Berita berhasil disimpan.');
     } catch (\Throwable $e) {
-        \System\Session::flash('admin_error', 'Gagal menyimpan berita. Periksa database dan skema tabel news.');
+        admin_log_news_error($e);
+        \System\Session::flash('admin_error', 'Gagal menyimpan berita.'.(env('APP_DEBUG', false) ? ' '.$e->getMessage() : ' Periksa database dan skema tabel news.'));
         return redirect($formUrl);
     } catch (\Exception $e) {
-        \System\Session::flash('admin_error', 'Gagal menyimpan berita. Periksa database dan skema tabel news.');
+        admin_log_news_error($e);
+        \System\Session::flash('admin_error', 'Gagal menyimpan berita.'.(env('APP_DEBUG', false) ? ' '.$e->getMessage() : ' Periksa database dan skema tabel news.'));
         return redirect($formUrl);
     }
 
@@ -1389,6 +1514,11 @@ Route::post('(:package)/news/delete', function () {
 
     try {
         $slug = text_limit(\System\Input::get('slug'), 160);
+        $item = \System\Database::connection()->first('SELECT image_path, pdf_path FROM news WHERE slug = ? LIMIT 1', [$slug]);
+        if ($item) {
+            admin_delete_news_upload($item->image_path);
+            admin_delete_news_upload($item->pdf_path);
+        }
         \System\Database::connection()->query('DELETE FROM news WHERE slug = ?', [$slug]);
         \System\Session::flash('admin_success', 'Berita berhasil dihapus.');
     } catch (\Throwable $e) {

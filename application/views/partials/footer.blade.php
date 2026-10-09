@@ -6,7 +6,11 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 py-12 md:grid-cols-4">
         <div class="md:col-span-2">
             <div class="flex items-center gap-3">
-                <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-700 text-sm font-bold text-white">BPR</span>
+                @if (! empty($settings['logo_path']))
+                    <img src="{{ asset($settings['logo_path']) }}" alt="Logo {{ $settings['company_name'] }}" class="h-11 w-11 rounded-2xl bg-white object-contain p-1 shadow-sm">
+                @else
+                    <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-700 text-sm font-bold text-white">BPR</span>
+                @endif
                 <div>
                     <p class="font-bold text-slate-950">{{ $settings['company_name'] }}</p>
                     <p class="text-sm text-slate-500">{{ $settings['tagline'] }}</p>
