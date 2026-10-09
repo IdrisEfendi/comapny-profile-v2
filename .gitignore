@@ -1,4 +1,5 @@
 /.env
+/.htaccess
 /storage/cache/*
 /storage/logs/*
 /storage/sessions/*
