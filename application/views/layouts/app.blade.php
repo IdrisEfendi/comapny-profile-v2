@@ -4,7 +4,8 @@
     $siteTagline = $siteSettings['tagline'];
     $pageTitle = (isset($title) && $title !== '') ? $title.' - '.$siteName : $siteName;
     $pageDescription = (isset($description) && $description !== '') ? $description : $siteName.', '.$siteTagline.'.';
-    $pageUrl = \System\URL::current();
+    $configuredUrl = rtrim((string) env('APP_URL', ''), '/');
+    $pageUrl = $configuredUrl !== '' ? $configuredUrl.parse_url(\System\URL::current(), PHP_URL_PATH) : \System\URL::current();
     $ogType = isset($og_type) ? $og_type : 'website';
     $ogImage = isset($og_image) && $og_image !== '' ? $og_image : (! empty($siteSettings['logo_path']) ? asset($siteSettings['logo_path']) : '');
 @endphp

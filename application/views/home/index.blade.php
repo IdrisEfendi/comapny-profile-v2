@@ -5,6 +5,7 @@
     $homeProduct = public_featured_product();
     $homeManagement = public_management();
     $homeProfile = public_company_profile();
+    $homeNews = array_slice(public_news(), 0, 3);
     $jsonLdRequest = \System\Request::foundation();
     $jsonLdBase = $jsonLdRequest->getScheme().'://'.$jsonLdRequest->getHttpHost();
     $jsonLdSchema = [
@@ -20,7 +21,7 @@
             'streetAddress' => $jsonLdSettings['address'],
             'addressCountry' => 'ID',
         ],
-        'openingHours' => $jsonLdSettings['office_hours'],
+        'openingHours' => 'Mo-Fr 08:00-14:00',
         'priceRange' => '$$',
     ];
 @endphp
@@ -80,7 +81,7 @@
                         <p class="text-sm font-semibold text-blue-700">Informasi Kantor</p>
                         <h2 class="mt-2 text-2xl font-bold text-slate-950">{{ $jsonLdSettings['company_name'] }}</h2>
                     </div>
-                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Aktif</span>
+                     <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">Kantor Resmi</span>
                 </div>
 
                 <div class="mt-8 space-y-4">
@@ -90,11 +91,11 @@
                     </div>
                     <div class="rounded-2xl bg-slate-50 p-5">
                         <p class="text-sm font-semibold text-slate-500">Telepon</p>
-                        <p class="mt-1 text-lg font-bold text-slate-950">{{ $jsonLdSettings['phone'] }}</p>
+                        <a href="{{ public_phone_href($jsonLdSettings['phone']) }}" class="mt-1 inline-block text-lg font-bold text-slate-950 hover:text-blue-700">{{ $jsonLdSettings['phone'] }}</a>
                     </div>
                     <div class="rounded-2xl bg-slate-50 p-5">
                         <p class="text-sm font-semibold text-slate-500">Email</p>
-                        <p class="mt-1 break-all text-lg font-bold text-slate-950">{{ $jsonLdSettings['email'] }}</p>
+                        <a href="mailto:{{ $jsonLdSettings['email'] }}" class="mt-1 inline-block break-all text-lg font-bold text-slate-950 hover:text-blue-700">{{ $jsonLdSettings['email'] }}</a>
                     </div>
                     <div class="rounded-2xl bg-blue-50 p-5">
                         <p class="text-sm font-semibold text-blue-700">Alamat</p>
@@ -103,6 +104,51 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
+
+<section class="bg-slate-100 py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Berita Terbaru</p>
+                <h2 class="mt-3 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Informasi terbaru dari BPR</h2>
+                <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">Ikuti informasi dan pengumuman terbaru yang dipublikasikan melalui kanal resmi {{ $jsonLdSettings['company_name'] }}.</p>
+            </div>
+            <a href="{{ url('berita') }}" class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:border-blue-700 hover:text-blue-800">Lihat Semua Berita</a>
+        </div>
+
+        @if (count($homeNews) === 0)
+            <div class="mt-10 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
+                <h3 class="text-xl font-bold text-slate-950">Belum ada berita terbaru</h3>
+                <p class="mt-3 leading-7 text-slate-600">Informasi dan pengumuman akan ditampilkan setelah tersedia di database.</p>
+            </div>
+        @else
+            <div class="mt-10 grid gap-6 lg:grid-cols-3">
+                @foreach ($homeNews as $item)
+                    <article class="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+                        @if (! empty($item['image_path']))
+                            <img src="{{ asset($item['image_path']) }}" alt="{{ $item['title'] }}" class="h-48 w-full object-cover">
+                        @else
+                            <div class="flex h-48 items-center justify-center bg-gradient-to-br from-blue-900 to-blue-700 text-4xl font-black text-white">{{ strtoupper(substr($item['title'], 0, 1)) }}</div>
+                        @endif
+                        <div class="flex flex-1 flex-col p-6">
+                            <div class="flex flex-wrap items-center gap-3 text-xs font-semibold text-blue-700">
+                                @if ($item['category'] !== '')
+                                    <span>{{ $item['category'] }}</span>
+                                @endif
+                                @if (public_format_date($item['published_at']) !== '')
+                                    <span class="text-slate-500">{{ public_format_date($item['published_at']) }}</span>
+                                @endif
+                            </div>
+                            <h3 class="mt-4 text-xl font-bold leading-tight text-slate-950">{{ $item['title'] }}</h3>
+                            <p class="mt-3 line-clamp-3 flex-1 leading-7 text-slate-600">{{ $item['summary'] }}</p>
+                            <a href="{{ url('berita/'.$item['slug']) }}" class="mt-6 inline-flex self-start rounded-full bg-blue-800 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-950">Baca Berita</a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        @endif
     </div>
 </section>
 
@@ -176,7 +222,7 @@
             <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">Direksi dan Komisaris</h2>
             <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600 mx-auto">Informasi pengurus ditampilkan untuk mendukung transparansi profil PT BPR Karawang Jabar (Perseroda).</p>
         </div>
-        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 justify-items-center">
             @if (count($homeManagement) === 0)
                 <div class="sm:col-span-2 lg:col-span-4 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
                     <h3 class="text-xl font-bold text-slate-950">Data pengurus belum tersedia</h3>
@@ -184,7 +230,7 @@
                 </div>
             @else
                 @foreach (array_slice($homeManagement, 0, 4) as $person)
-                <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10 text-center"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{{ $person['initials'] }}</div><p class="mt-5 font-bold text-slate-950">{{ $person['name'] }}</p><p class="mt-2 text-sm text-slate-500">{{ $person['position'] }}</p></div>
+                <div class="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-lg shadow-slate-900/10"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{{ $person['initials'] }}</div><p class="mt-5 font-bold text-slate-950">{{ $person['name'] }}</p><p class="mt-2 text-sm text-slate-500">{{ $person['position'] }}</p></div>
                 @endforeach
             @endif
         </div>

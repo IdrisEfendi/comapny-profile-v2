@@ -48,6 +48,9 @@
                         <td class="px-5 py-4 text-slate-700">{{ ! empty($item['published_at']) ? $item['published_at'] : '-' }}</td>
                         <td class="px-5 py-4">
                             <div class="flex items-center justify-end gap-2">
+                                @if (! empty($item['is_published']))
+                                    <a href="{{ url('berita/'.$item['slug']) }}" target="_blank" rel="noopener" class="rounded-full border border-blue-200 px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50">Lihat Website</a>
+                                @endif
                                 <a href="{{ url('admin/news/'.$item['id'].'/edit') }}" class="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:border-blue-700 hover:text-blue-800">Edit</a>
                                 <form action="{{ url('admin/news/delete') }}" method="post" onsubmit="return confirm('Hapus berita ini?')">
                                     @php echo csrf_field(); @endphp
