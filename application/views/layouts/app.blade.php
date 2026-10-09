@@ -31,6 +31,7 @@
     <meta name="twitter:description" content="{{ $pageDescription }}">
     <link rel="icon" type="image/png" href="{{ $ogImage !== '' ? $ogImage : 'data:;base64,iVBORw0KGgo=' }}">
     <title>{{ $pageTitle }}</title>
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
     <script src="https://cdn.tailwindcss.com"></script>
     @yield('head')
 </head>
@@ -42,5 +43,21 @@
     </main>
 
     @include('partials.footer')
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof AOS === 'undefined') {
+                return;
+            }
+
+            AOS.init({
+                duration: 700,
+                easing: 'ease-out-cubic',
+                once: true,
+                offset: 80,
+                disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            });
+        });
+    </script>
 </body>
 </html>

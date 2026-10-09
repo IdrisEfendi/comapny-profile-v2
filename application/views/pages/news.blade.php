@@ -15,7 +15,7 @@
     </div>
 </section>
 
-<section class="py-20 sm:py-24">
+<section class="py-20 sm:py-24" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         @if (count($news) === 0)
             <div class="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-lg shadow-slate-900/10">
@@ -31,7 +31,7 @@
                         $date = public_format_date($item['published_at']);
                         $detailUrl = url('berita/'.$item['slug']);
                     @endphp
-                    <article class="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+                    <article class="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         @if (! empty($item['image_path']))
                             <img src="{{ asset($item['image_path']) }}" alt="{{ $item['title'] }}" class="h-56 w-full object-cover">
                         @endif

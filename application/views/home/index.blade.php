@@ -30,76 +30,89 @@
 <script type="application/ld+json">
 {!! json_encode($jsonLdSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
+<style>
+    @keyframes hero-fade-up {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes hero-orb-drift {
+        0%, 100% { transform: translate3d(0, 0, 0); }
+        50% { transform: translate3d(18px, 10px, 0); }
+    }
+
+    .hero-fade-up {
+        opacity: 0;
+        animation: hero-fade-up 700ms cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    .hero-delay-1 { animation-delay: 100ms; }
+    .hero-delay-2 { animation-delay: 220ms; }
+    .hero-delay-3 { animation-delay: 340ms; }
+    .hero-delay-4 { animation-delay: 460ms; }
+    .hero-orb { animation: hero-orb-drift 9s ease-in-out infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .hero-fade-up {
+            opacity: 1;
+            animation: none;
+        }
+
+        .hero-orb { animation: none; }
+    }
+</style>
 @endsection
 
 @section('content')
-<section class="relative overflow-hidden bg-slate-950">
-    <div class="absolute inset-0 bg-blue-900/20"></div>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative grid min-h-screen items-center gap-12 py-20 lg:grid-cols-2 lg:py-24">
+<section class="relative isolate overflow-hidden bg-slate-950">
+    <div class="hero-orb absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-700/20 blur-3xl"></div>
+    <div class="hero-orb absolute -bottom-56 right-0 h-[30rem] w-[30rem] rounded-full bg-blue-500/10 blur-3xl" style="animation-delay: -4s;"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(135deg,#020617_0%,#0f172a_62%,#172554_100%)]"></div>
+    <div class="relative mx-auto flex max-w-7xl items-center px-4 py-20 sm:px-6 sm:py-24 lg:min-h-[calc(100vh-7rem)] lg:px-8 lg:py-28">
         <div>
-            <p class="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-blue-100 backdrop-blur">{{ $jsonLdSettings['company_name'] }}</p>
-            <h1 class="mt-7 max-w-4xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">{{ $jsonLdSettings['tagline'] }}</h1>
-            <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">{{ $homeProfile['hero_intro'] }}</p>
-            <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a href="{{ url('kontak') }}" class="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-900 shadow-lg shadow-slate-900/10 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-950">Hubungi Kami</a>
-                <a href="{{ url('produk-layanan') }}" class="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:border-white/40 hover:bg-white/10">Lihat Produk</a>
+            <div class="hero-fade-up hero-delay-1 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.22em] text-blue-200">
+                <span class="h-px w-8 bg-amber-300"></span>
+                <span>Profil Perusahaan</span>
             </div>
-            <div class="mt-10 max-w-2xl overflow-hidden rounded-3xl border border-white/15 bg-white/[0.08] shadow-2xl shadow-slate-950/20 backdrop-blur">
-                <div class="grid divide-y divide-white/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-                    <div class="p-5 sm:p-6">
-                        <div class="flex items-center gap-3">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-300 text-sm font-black text-slate-950">01</span>
-                            <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Jam layanan</p>
-                        </div>
-                        <p class="mt-5 text-2xl font-bold tracking-tight text-white">{{ preg_match('/\d{2}:\d{2}/', $jsonLdSettings['office_hours'], $time) ? $time[0] : '-' }}</p>
-                        <p class="mt-1 text-sm text-slate-300">Mulai operasional</p>
-                    </div>
-                    <div class="p-5 sm:p-6">
-                        <div class="flex items-center gap-3">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-200 text-sm font-black text-blue-950">02</span>
-                            <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Produk utama</p>
-                        </div>
-                        <p class="mt-5 truncate text-2xl font-bold tracking-tight text-white">{{ $homeProduct['name'] ?? '-' }}</p>
-                        <p class="mt-1 truncate text-sm text-slate-300">{{ $homeProduct['subtitle'] ?? 'Informasi produk' }}</p>
-                    </div>
-                    <div class="p-5 sm:p-6">
-                        <div class="flex items-center gap-3">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-200 text-sm font-black text-emerald-950">03</span>
-                            <p class="text-xs font-bold uppercase tracking-widest text-blue-100">Cakupan</p>
-                        </div>
-                        <p class="mt-5 line-clamp-2 text-lg font-bold leading-snug tracking-tight text-white">{{ $homeProfile['area_service'] }}</p>
-                        <p class="mt-1 text-sm text-slate-300">Area layanan</p>
-                    </div>
-                </div>
+            <p class="hero-fade-up hero-delay-2 mt-7 max-w-xl text-sm font-semibold text-blue-200">{{ $jsonLdSettings['company_name'] }}</p>
+            <h1 class="hero-fade-up hero-delay-2 mt-4 max-w-4xl text-5xl font-black leading-[1.04] tracking-[-0.035em] text-white sm:text-6xl lg:text-7xl">{{ $jsonLdSettings['tagline'] }}</h1>
+            <p class="hero-fade-up hero-delay-3 mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{{ $homeProfile['hero_intro'] }}</p>
+            <div class="hero-fade-up hero-delay-4 mt-10 flex flex-col gap-3 sm:flex-row">
+                <a href="{{ url('kontak') }}" class="inline-flex items-center justify-center rounded-2xl bg-amber-300 px-6 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-950/20 transition hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-slate-950">Hubungi Kami</a>
+                <a href="{{ url('produk-layanan') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-transparent px-6 py-3.5 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10">Jelajahi Produk</a>
             </div>
         </div>
 
-        <div class="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
-            <div class="rounded-3xl bg-white p-6 sm:p-8">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <p class="text-sm font-semibold text-blue-700">Informasi Kantor</p>
-                        <h2 class="mt-2 text-2xl font-bold text-slate-950">{{ $jsonLdSettings['company_name'] }}</h2>
-                    </div>
-                     <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">Kantor Resmi</span>
-                </div>
+        <div class="relative hidden min-h-[32rem] lg:block">
+            <div class="absolute right-10 top-8 h-64 w-64 rounded-full border border-blue-300/20"></div>
+            <div class="absolute right-24 top-24 h-80 w-80 rounded-full border border-white/10"></div>
+        </div>
+    </div>
+</section>
 
-                <div class="mt-8 space-y-4">
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <p class="text-sm font-semibold text-slate-500">Jam Layanan</p>
-                        <p class="mt-1 text-lg font-bold text-slate-950">{{ $jsonLdSettings['office_hours'] }}</p>
-                    </div>
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <p class="text-sm font-semibold text-slate-500">Telepon</p>
-                        <a href="{{ public_phone_href($jsonLdSettings['phone']) }}" class="mt-1 inline-block text-lg font-bold text-slate-950 hover:text-blue-700">{{ $jsonLdSettings['phone'] }}</a>
-                    </div>
-                    <div class="rounded-2xl bg-slate-50 p-5">
-                        <p class="text-sm font-semibold text-slate-500">Email</p>
-                        <a href="mailto:{{ $jsonLdSettings['email'] }}" class="mt-1 inline-block break-all text-lg font-bold text-slate-950 hover:text-blue-700">{{ $jsonLdSettings['email'] }}</a>
-                    </div>
-                    <div class="rounded-2xl bg-blue-50 p-5">
-                        <p class="text-sm font-semibold text-blue-700">Alamat</p>
-                        <p class="mt-1 leading-6 text-slate-700">{{ $jsonLdSettings['address'] }}</p>
+<section class="bg-white py-16 sm:py-20" data-aos="fade-up">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="rounded-[2rem] bg-blue-950 p-6 text-white shadow-2xl shadow-blue-950/20 sm:p-10 lg:p-12">
+            <div class="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-end">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-[0.2em] text-blue-200">Informasi Kantor</p>
+                    <h2 class="mt-4 text-3xl font-black tracking-tight sm:text-4xl">Hubungi {{ $jsonLdSettings['company_name'] }}</h2>
+                    <p class="mt-4 max-w-xl leading-7 text-blue-100">Gunakan kanal resmi berikut untuk mendapatkan informasi layanan dan menghubungi kantor pada jam operasional.</p>
+                    <a href="{{ url('kontak') }}" class="mt-7 inline-flex rounded-2xl bg-amber-300 px-6 py-3.5 text-sm font-bold text-slate-950 hover:bg-amber-200">Lihat Kontak Lengkap</a>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <a href="{{ public_phone_href($jsonLdSettings['phone']) }}" class="rounded-2xl border border-white/10 bg-white/[0.08] p-5 transition hover:bg-white/15">
+                        <span class="text-xs font-bold uppercase tracking-widest text-blue-200">Telepon</span>
+                        <span class="mt-2 block font-bold text-white">{{ $jsonLdSettings['phone'] }}</span>
+                    </a>
+                    <a href="mailto:{{ $jsonLdSettings['email'] }}" class="rounded-2xl border border-white/10 bg-white/[0.08] p-5 transition hover:bg-white/15">
+                        <span class="text-xs font-bold uppercase tracking-widest text-blue-200">Email</span>
+                        <span class="mt-2 block break-all font-bold text-white">{{ $jsonLdSettings['email'] }}</span>
+                    </a>
+                    <div class="rounded-2xl border border-white/10 bg-white/[0.08] p-5 sm:col-span-2">
+                        <span class="text-xs font-bold uppercase tracking-widest text-blue-200">Alamat dan Jam Layanan</span>
+                        <span class="mt-2 block font-bold text-white">{{ $jsonLdSettings['address'] }}</span>
+                        <span class="mt-1 block text-sm text-blue-100">{{ $jsonLdSettings['office_hours'] }}</span>
                     </div>
                 </div>
             </div>
@@ -107,7 +120,7 @@
     </div>
 </section>
 
-<section class="bg-slate-100 py-20 sm:py-24">
+<section class="bg-slate-100 py-20 sm:py-24" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
@@ -126,7 +139,7 @@
         @else
             <div class="mt-10 grid gap-6 lg:grid-cols-3">
                 @foreach ($homeNews as $item)
-                    <article class="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+                    <article class="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         @if (! empty($item['image_path']))
                             <img src="{{ asset($item['image_path']) }}" alt="{{ $item['title'] }}" class="h-48 w-full object-cover">
                         @else
@@ -152,7 +165,7 @@
     </div>
 </section>
 
-<section class="py-20 sm:py-24">
+<section class="py-20 sm:py-24" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-12 lg:grid-cols-2 lg:items-center">
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Tentang Kami</p>
@@ -230,7 +243,7 @@
                 </div>
             @else
                 @foreach (array_slice($homeManagement, 0, 4) as $person)
-                <div class="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-lg shadow-slate-900/10"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{{ $person['initials'] }}</div><p class="mt-5 font-bold text-slate-950">{{ $person['name'] }}</p><p class="mt-2 text-sm text-slate-500">{{ $person['position'] }}</p></div>
+                <div class="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-lg shadow-slate-900/10" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}"><div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">{{ $person['initials'] }}</div><p class="mt-5 font-bold text-slate-950">{{ $person['name'] }}</p><p class="mt-2 text-sm text-slate-500">{{ $person['position'] }}</p></div>
                 @endforeach
             @endif
         </div>
@@ -240,7 +253,7 @@
     </div>
 </section>
 
-<section class="bg-blue-900 py-16 text-white sm:py-20">
+<section class="bg-blue-900 py-16 text-white sm:py-20" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-2 lg:items-center">
         <div>
             <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Kontak Cepat</p>

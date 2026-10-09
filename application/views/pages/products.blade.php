@@ -25,7 +25,7 @@
     </div>
 </section>
 
-<section class="py-20 sm:py-24">
+<section class="py-20 sm:py-24" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl">
             <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Produk Utama</p>
