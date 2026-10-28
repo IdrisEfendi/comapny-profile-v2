@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Keep real files and directories available, including assets and uploads.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

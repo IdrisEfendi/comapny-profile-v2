@@ -1,0 +1,10 @@
+User-agent: *
+
+Disallow: /application/*
+Disallow: /cgi-bin/*
+Disallow: /packages/*
+Disallow: /storage/*
+Disallow: /system/*
+Disallow: /vendor/*
+
+Sitemap: https://bprkarawangjabar.com/sitemap.xml

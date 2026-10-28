@@ -1,0 +1,22 @@
+{
+  "name": "company-profile-v2",
+  "version": "1.0.0",
+  "description": "<h1 align=\"center\">Rakit Web Framework</h1>",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tailwindcss -i ./resources/css/app.css -o ./assets/css/app.css --watch",
+    "build": "tailwindcss -i ./resources/css/app.css -o ./assets/css/app.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}

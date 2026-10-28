@@ -1,0 +1,490 @@
+<?php
+
+if (! function_exists('csrf_token')) {
+    function csrf_token()
+    {
+        $token = \System\Session::get('_csrf_token');
+
+        if (! $token) {
+            $token = bin2hex(random_bytes(32));
+            \System\Session::put('_csrf_token', $token);
+        }
+
+        return $token;
+    }
+}
+
+if (! function_exists('csrf_field')) {
+    function csrf_field()
+    {
+        return '<input type="hidden" name="_token" value="'.htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8').'">';
+    }
+}
+
+if (! function_exists('csrf_check')) {
+    function csrf_check($token)
+    {
+        $sessionToken = \System\Session::get('_csrf_token');
+
+        return is_string($sessionToken) && is_string($token) && hash_equals($sessionToken, $token);
+    }
+}
+
+if (! function_exists('text_limit')) {
+    function text_limit($value, $max)
+    {
+        return mb_substr(trim((string) $value), 0, $max);
+    }
+}
+
+if (! function_exists('public_default_settings')) {
+    /**
+     * Default data website public jika database belum tersedia atau bermasalah.
+     */
+    function public_default_settings()
+    {
+        return [
+            'company_name' => 'PT BPR Karawang Jabar (Perseroda)',
+            'tagline' => 'Mitra Keuangan Masyarakat Karawang',
+            'phone' => '(0264) 8380203',
+            'email' => 'ptbptkarawang@gmail.com',
+            'address' => 'Jln Raya Cilamaya Komplek Kantor Kecamatan Cilamaya Wetan',
+            'office_hours' => 'Senin - Jumat, 08:00 - 14:00',
+            'whatsapp' => '',
+            'google_maps_url' => '',
+            'notification_email' => '',
+            'logo_path' => '',
+        ];
+    }
+}
+
+if (! function_exists('public_key_value_table')) {
+    function public_key_value_table($table, array $defaults)
+    {
+        try {
+            $rows = \System\Database::connection()->query("SELECT `key`, `value` FROM {$table}");
+
+            foreach ($rows as $row) {
+                $defaults[$row->key] = $row->value;
+            }
+        } catch (\Throwable $e) {
+            // Fallback default agar public website tetap hidup jika database bermasalah.
+        } catch (\Exception $e) {
+            // Fallback untuk PHP lama.
+        }
+
+        return $defaults;
+    }
+}
+
+if (! function_exists('public_settings')) {
+    /**
+     * Ambil seluruh setting public atau satu key tertentu dari database.
+     */
+    function public_settings($key = null, $default = null)
+    {
+        static $settings;
+
+        if ($settings === null) {
+            $settings = public_key_value_table('site_settings', public_default_settings());
+        }
+
+        if ($key === null) {
+            return $settings;
+        }
+
+        return array_key_exists($key, $settings) && $settings[$key] !== '' ? $settings[$key] : $default;
+    }
+}
+
+if (! function_exists('public_phone_href')) {
+    function public_phone_href($phone = null)
+    {
+        $phone = $phone ?: public_settings('phone', '');
+        $normalized = preg_replace('/[^0-9+]/', '', $phone);
+
+        return $normalized !== '' ? 'tel:'.$normalized : '#';
+    }
+}
+
+if (! function_exists('public_whatsapp_href')) {
+    function public_whatsapp_href($whatsapp = null)
+    {
+        $whatsapp = $whatsapp ?: public_settings('whatsapp', '');
+        $normalized = preg_replace('/[^0-9]/', '', $whatsapp);
+
+        return $normalized !== '' ? 'https://wa.me/'.$normalized : '';
+    }
+}
+
+if (! function_exists('public_safe_url')) {
+    function public_safe_url($url)
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return '';
+        }
+
+        return preg_match('/^https?:\/\//i', $url) ? $url : '';
+    }
+}
+
+if (! function_exists('public_default_products')) {
+    function public_default_products()
+    {
+        return [
+            [
+                'slug' => 'tahara',
+                'name' => 'TAHARA',
+                'category' => 'Tabungan',
+                'subtitle' => 'Tabungan Hari Raya',
+                'summary' => 'Produk tabungan untuk membantu perencanaan kebutuhan hari raya.',
+                'target' => 'Masyarakat umum',
+                'detail_label' => 'Hubungi BPR',
+                'is_featured' => true,
+            ],
+        ];
+    }
+}
+
+if (! function_exists('public_products')) {
+    function public_products()
+    {
+        static $products;
+
+        if ($products !== null) {
+            return $products;
+        }
+
+        try {
+            $rows = \System\Database::connection()->query('SELECT id, slug, name, category, subtitle, summary, target, detail_label, is_featured FROM products ORDER BY sort_order ASC, id ASC');
+            $products = [];
+
+            foreach ($rows as $row) {
+                $products[] = [
+                    'id' => (int) $row->id,
+                    'slug' => $row->slug,
+                    'name' => $row->name,
+                    'category' => $row->category,
+                    'subtitle' => $row->subtitle,
+                    'summary' => $row->summary,
+                    'target' => $row->target,
+                    'detail_label' => $row->detail_label,
+                    'is_featured' => (bool) $row->is_featured,
+                ];
+            }
+
+            if (count($products) === 0) {
+                $products = public_default_products();
+            }
+        } catch (\Throwable $e) {
+            $products = public_default_products();
+        } catch (\Exception $e) {
+            $products = public_default_products();
+        }
+
+        return $products;
+    }
+}
+
+if (! function_exists('public_featured_product')) {
+    function public_featured_product()
+    {
+        foreach (public_products() as $product) {
+            if (! empty($product['is_featured'])) {
+                return $product;
+            }
+        }
+
+        $products = public_products();
+
+        return count($products) ? $products[0] : null;
+    }
+}
+
+if (! function_exists('public_product_by_slug')) {
+    function public_product_by_slug($slug)
+    {
+        $slug = trim((string) $slug);
+
+        foreach (public_products() as $product) {
+            if (isset($product['slug']) && $product['slug'] === $slug) {
+                return $product;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (! function_exists('public_product_initial')) {
+    function public_product_initial(array $product)
+    {
+        return strtoupper(substr($product['name'] ?? 'P', 0, 1));
+    }
+}
+
+if (! function_exists('public_default_news')) {
+    function public_default_news()
+    {
+        return [];
+    }
+}
+
+if (! function_exists('public_news')) {
+    function public_news()
+    {
+        static $news;
+
+        if ($news !== null) {
+            return $news;
+        }
+
+        try {
+            $rows = \System\Database::connection()->query('SELECT slug, title, category, summary, published_at, image_path, pdf_path FROM news WHERE is_published = 1 ORDER BY published_at DESC, id DESC');
+            $news = [];
+
+            foreach ($rows as $row) {
+                $news[] = [
+                    'slug' => $row->slug,
+                    'title' => $row->title,
+                    'category' => $row->category,
+                    'summary' => $row->summary,
+                    'published_at' => $row->published_at,
+                    'image_path' => $row->image_path,
+                    'pdf_path' => $row->pdf_path,
+                ];
+            }
+
+            if (count($news) === 0) {
+                $news = public_default_news();
+            }
+        } catch (\Throwable $e) {
+            $news = public_default_news();
+        } catch (\Exception $e) {
+            $news = public_default_news();
+        }
+
+        return $news;
+    }
+}
+
+if (! function_exists('public_news_by_slug')) {
+    function public_news_by_slug($slug)
+    {
+        $slug = trim((string) $slug);
+
+        if ($slug === '') {
+            return null;
+        }
+
+        try {
+            $row = \System\Database::connection()->first('SELECT id, slug, title, category, summary, content, published_at, image_path, pdf_path FROM news WHERE slug = ? AND is_published = 1 LIMIT 1', [$slug]);
+
+            if (! $row) {
+                return null;
+            }
+
+            return [
+                'id' => (int) $row->id,
+                'slug' => $row->slug,
+                'title' => $row->title,
+                'category' => $row->category,
+                'summary' => $row->summary,
+                'content' => $row->content,
+                'published_at' => $row->published_at,
+                'image_path' => $row->image_path,
+                'pdf_path' => $row->pdf_path,
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+}
+
+if (! function_exists('public_format_date')) {
+    function public_format_date($date)
+    {
+        $date = trim((string) $date);
+
+        if ($date === '' || ! preg_match('/^\d{4}-\d{2}-\d{2}/', $date, $match)) {
+            return '';
+        }
+
+        $parts = explode('-', $match[0]);
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+        $month = (int) $parts[1];
+
+        return (int) $parts[2].' '.($months[$month] ?? $parts[1]).' '.$parts[0];
+    }
+}
+
+if (! function_exists('send_contact_notification_email')) {
+    function send_contact_notification_email(array $data)
+    {
+        try {
+            $settings = public_settings();
+            $to = trim((string) ($settings['notification_email'] ?? ''));
+            $to = $to !== '' ? $to : trim((string) $settings['email']);
+            $from = trim((string) $settings['email']);
+
+            if ($to === '' || $from === '' || ! filter_var($to, FILTER_VALIDATE_EMAIL)) {
+                return false;
+            }
+
+            $subject = trim((string) ($data['subject'] ?? ''));
+            $subject = $subject !== '' ? $subject : 'Pesan dari website';
+            $lines = [];
+            $lines[] = 'Pesan kontak baru dari website '.$settings['company_name'].'.';
+            $lines[] = '';
+            $lines[] = 'Nama: '.$data['name'];
+            $lines[] = 'Email/Telepon: '.$data['contact'];
+            $lines[] = 'Subjek: '.$subject;
+            $lines[] = 'Pesan:';
+            $lines[] = $data['message'];
+
+            \System\Email::from($from, $settings['company_name'])
+                ->to($to)
+                ->subject('[Kontak Website] '.$subject)
+                ->body(implode(PHP_EOL, $lines))
+                ->send();
+
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}
+
+if (! function_exists('public_default_management')) {
+    function public_default_management()
+    {
+        return [];
+    }
+}
+
+if (! function_exists('public_management')) {
+    function public_management()
+    {
+        static $management;
+
+        if ($management !== null) {
+            return $management;
+        }
+
+        try {
+            $rows = \System\Database::connection()->query('SELECT id, name, position, group_name, initials, bio, photo_path FROM management ORDER BY sort_order ASC, id ASC');
+            $management = [];
+
+            foreach ($rows as $row) {
+                $management[] = [
+                    'id' => (int) $row->id,
+                    'name' => $row->name,
+                    'position' => $row->position,
+                    'group' => $row->group_name,
+                    'initials' => $row->initials,
+                    'bio' => $row->bio,
+                    'photo_path' => $row->photo_path,
+                ];
+            }
+
+            if (count($management) === 0) {
+                $management = public_default_management();
+            }
+        } catch (\Throwable $e) {
+            $management = public_default_management();
+        } catch (\Exception $e) {
+            $management = public_default_management();
+        }
+
+        return $management;
+    }
+}
+
+if (! function_exists('public_management_by_group')) {
+    function public_management_by_group($group)
+    {
+        return array_values(array_filter(public_management(), function ($person) use ($group) {
+            return isset($person['group']) && $person['group'] === $group;
+        }));
+    }
+}
+
+if (! function_exists('public_default_company_profile')) {
+    function public_default_company_profile()
+    {
+        return [
+            'hero_intro' => 'Profil PT BPR Karawang Jabar (Perseroda) sebagai BPR yang dekat dengan masyarakat Karawang, khususnya area Cilamaya dan sekitarnya.',
+            'profile_heading' => 'BPR yang dekat dengan kebutuhan masyarakat Karawang',
+            'profile_summary' => 'PT BPR Karawang Jabar (Perseroda) merupakan BPR yang berfokus melayani kebutuhan keuangan masyarakat Karawang. Website ini disiapkan sebagai media informasi publik agar profil perusahaan, produk, pengurus, dan kanal kontak dapat diakses dengan mudah.',
+            'area_service' => 'Karawang dan sekitarnya, dengan informasi kantor yang merujuk ke area Cilamaya Wetan.',
+            'information_focus' => 'Profil BPR, produk TAHARA, pengurus, alamat, telepon, email, dan jam layanan.',
+            'vision' => 'Menjadi BPR daerah yang dikenal dekat dengan masyarakat, mudah diakses, dan mampu mendukung kebutuhan layanan keuangan masyarakat Karawang.',
+            'mission' => 'Menyediakan informasi layanan yang jelas, membangun komunikasi yang terbuka, serta membantu masyarakat memperoleh akses informasi produk BPR dengan mudah.',
+        ];
+    }
+}
+
+if (! function_exists('public_company_profile')) {
+    function public_company_profile()
+    {
+        static $profile;
+
+        if ($profile !== null) {
+            return $profile;
+        }
+
+        $profile = public_key_value_table('company_profile', public_default_company_profile());
+
+        return $profile;
+    }
+}
+
+if (! function_exists('env')) {
+    /**
+     * Ambil nilai environment variable dari .env / server environment.
+     */
+    function env($key, $default = null)
+    {
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+
+        if ($value === false || $value === null) {
+            return $default;
+        }
+
+        switch (strtolower((string) $value)) {
+            case 'true':
+            case '(true)':
+                return true;
+            case 'false':
+            case '(false)':
+                return false;
+            case 'empty':
+            case '(empty)':
+                return '';
+            case 'null':
+            case '(null)':
+                return null;
+        }
+
+        if (is_string($value) && strlen($value) >= 2) {
+            $first = $value[0];
+            $last = $value[strlen($value) - 1];
+
+            if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                return substr($value, 1, -1);
+            }
+        }
+
+        return $value;
+    }
+}
