@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - BPR Karawang</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-slate-950 text-slate-800">
     <main class="flex min-h-screen items-center justify-center px-4 py-12">

@@ -31,6 +31,51 @@ function admin_require_csrf($redirect = 'admin/dashboard')
     return null;
 }
 
+function admin_audit($action, array $context = [])
+{
+    $user = admin_current_user();
+    $entry = [
+        'time' => date('c'),
+        'action' => (string) $action,
+        'user_id' => $user ? (int) $user->id : null,
+        'username' => $user ? (string) $user->username : null,
+        'ip' => (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
+        'context' => $context,
+    ];
+
+    error_log('[admin-audit] '.json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+}
+
+function admin_safe_back($fallback = 'admin/dashboard')
+{
+    $back = trim((string) admin_post_value('back', $fallback));
+
+    if ($back === '' || strpos($back, '/') === 0 || preg_match('#^[a-z][a-z0-9+.-]*://#i', $back) || strpos($back, 'admin/') !== 0) {
+        return $fallback;
+    }
+
+    return $back;
+}
+
+function admin_login_rate_limited($key)
+{
+    $now = time();
+    $attempts = (array) \System\Session::get('admin_login_attempts', []);
+    $attempts = array_values(array_filter($attempts, function ($timestamp) use ($now) {
+        return is_int($timestamp) && ($now - $timestamp) < 900;
+    }));
+    \System\Session::put('admin_login_attempts', $attempts);
+
+    return count($attempts) >= 5;
+}
+
+function admin_record_login_failure()
+{
+    $attempts = (array) \System\Session::get('admin_login_attempts', []);
+    $attempts[] = time();
+    \System\Session::put('admin_login_attempts', array_slice($attempts, -10));
+}
+
 function admin_find_user_by_username($username)
 {
     return \System\Database::connection()->first('SELECT * FROM admin_users WHERE username = ? AND is_active = 1 LIMIT 1', [$username]);
@@ -215,8 +260,9 @@ function admin_store_logo_upload($key = 'logo')
     }
 
     $info = @getimagesize($file['tmp_name']);
+    $mime = class_exists('finfo') ? (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']) : '';
     $types = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
-    if (! $info || ! isset($types[$info[2]]) || ! is_uploaded_file($file['tmp_name'])) {
+    if (! $info || ! isset($types[$info[2]]) || ! in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true) || ! is_uploaded_file($file['tmp_name'])) {
         throw new \Exception('Logo harus berupa JPG, PNG, atau WEBP yang valid.');
     }
 
@@ -448,18 +494,21 @@ function admin_store_management_photo($key = 'photo')
         return null;
     }
 
-    if ((int) $_FILES[$key]['size'] > 2 * 1024 * 1024) {
+    if ((int) $_FILES[$key]['error'] !== UPLOAD_ERR_OK || (int) $_FILES[$key]['size'] <= 0 || (int) $_FILES[$key]['size'] > 2 * 1024 * 1024) {
         throw new \Exception('Ukuran foto maksimal 2MB.');
     }
 
-    $info = getimagesize($_FILES[$key]['tmp_name']);
+    $info = @getimagesize($_FILES[$key]['tmp_name']);
     $allowed = [
         IMAGETYPE_JPEG => 'jpg',
         IMAGETYPE_PNG => 'png',
         IMAGETYPE_WEBP => 'webp',
     ];
 
-    if (! $info || ! isset($allowed[$info[2]])) {
+    $mime = class_exists('finfo') ? (new \finfo(FILEINFO_MIME_TYPE))->file($_FILES[$key]['tmp_name']) : '';
+    $allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (! $info || ! isset($allowed[$info[2]]) || ! in_array($mime, $allowedMime, true)) {
         throw new \Exception('Format foto harus JPG, PNG, atau WEBP.');
     }
 
@@ -540,23 +589,42 @@ Route::post('(:package)/login', function () {
 
     $username = text_limit(\System\Input::get('username'), 100);
     $password = (string) \System\Input::get('password');
+    $rateKey = $username.'|'.(string) ($_SERVER['REMOTE_ADDR'] ?? '');
+
+    if (admin_login_rate_limited($rateKey)) {
+        admin_audit('login_rate_limited', ['username' => $username]);
+        \System\Session::flash('admin_login_error', 'Terlalu banyak percobaan login. Silakan tunggu 15 menit.');
+        return redirect('admin/login');
+    }
+
     $user = admin_find_user_by_username($username);
 
     if ($user && password_verify($password, $user->password_hash)) {
+        \System\Session::instance()->regenerate();
+        \System\Session::forget('admin_login_attempts');
         \System\Session::put('admin_logged_in', true);
         \System\Session::put('admin_user_id', (int) $user->id);
         \System\Session::put('admin_username', $user->username);
         \System\Database::connection()->query('UPDATE admin_users SET last_login_at = ? WHERE id = ?', [date('Y-m-d H:i:s'), (int) $user->id]);
+        admin_audit('login_success');
 
         return redirect('admin/dashboard');
     }
 
+    admin_record_login_failure();
+    admin_audit('login_failure', ['username' => $username]);
     \System\Session::flash('admin_login_error', 'Username atau password tidak sesuai.');
 
     return redirect('admin/login');
 });
 
-Route::get('(:package)/logout', function () {
+Route::post('(:package)/logout', function () {
+    if (! csrf_check((string) \System\Input::get('_token'))) {
+        return redirect('admin/dashboard');
+    }
+
+    admin_audit('logout');
+    \System\Session::instance()->regenerate();
     \System\Session::forget('admin_logged_in');
     \System\Session::forget('admin_user_id');
     \System\Session::forget('admin_username');
@@ -705,7 +773,23 @@ Route::post('(:package)/account/delete', function () {
     }
 
     $id = (int) \System\Input::get('id');
+    $currentId = (int) \System\Session::get('admin_user_id', 0);
+    $activeCount = (int) \System\Database::connection()->only('SELECT COUNT(*) FROM admin_users WHERE is_active = 1');
+
+    if ($id === $currentId) {
+        \System\Session::flash('admin_error', 'Akun yang sedang digunakan tidak dapat dihapus.');
+        return redirect('admin/account');
+    }
+
+    admin_audit('account_save', ['id' => $originalId ?: null]);
+
+    if ($activeCount <= 1) {
+        \System\Session::flash('admin_error', 'Admin terakhir tidak dapat dihapus.');
+        return redirect('admin/account');
+    }
+
     \System\Database::connection()->query('DELETE FROM admin_users WHERE id = ?', [$id]);
+    admin_audit('admin_delete', ['id' => $id]);
     \System\Session::flash('admin_success', 'Akun berhasil dihapus.');
 
     return redirect('admin/account');
@@ -763,7 +847,7 @@ Route::post('(:package)/contact-messages/status', function () {
     \System\Database::connection()->query('UPDATE contact_messages SET is_read = ?, updated_at = ? WHERE id = ?', [$status, date('Y-m-d H:i:s'), $id]);
     \System\Session::flash('admin_success', $status ? 'Pesan ditandai sudah dibaca.' : 'Pesan ditandai belum dibaca.');
 
-    return redirect(admin_post_value('back', 'admin/contact-messages'));
+    return redirect(admin_safe_back('admin/contact-messages'));
 });
 
 Route::post('(:package)/contact-messages/delete', function () {
@@ -777,9 +861,10 @@ Route::post('(:package)/contact-messages/delete', function () {
 
     $id = (int) admin_post_value('id');
     \System\Database::connection()->query('DELETE FROM contact_messages WHERE id = ?', [$id]);
+    admin_audit('contact_delete', ['id' => $id]);
     \System\Session::flash('admin_success', 'Pesan kontak berhasil dihapus.');
 
-    return redirect(admin_post_value('back', 'admin/contact-messages'));
+    return redirect(admin_safe_back('admin/contact-messages'));
 });
 
 Route::get('(:package)/settings', function () {
@@ -829,6 +914,7 @@ Route::post('(:package)/settings', function () {
     }
 
     admin_save_settings($settings);
+    admin_audit('settings_save', ['logo_uploaded' => (bool) $uploadedLogo]);
     \System\Session::flash('admin_success', 'Pengaturan berhasil disimpan.');
 
     return redirect('admin/settings');
@@ -863,6 +949,7 @@ Route::post('(:package)/company-profile', function () {
     }
 
     admin_save_company_profile($profile);
+    admin_audit('company_profile_save');
     \System\Session::flash('admin_success', 'Profil perusahaan berhasil disimpan.');
 
     return redirect('admin/company-profile');
@@ -962,6 +1049,7 @@ Route::post('(:package)/products', function () {
     }
 
     \System\Session::flash('admin_success', 'Produk berhasil disimpan.');
+    admin_audit('product_save', ['id' => $originalId ?: null]);
 
     return redirect('admin/products');
 });
@@ -977,6 +1065,7 @@ Route::post('(:package)/products/delete', function () {
 
     $slug = text_limit(\System\Input::get('slug'), 160);
     \System\Database::connection()->query('DELETE FROM products WHERE slug = ?', [$slug]);
+    admin_audit('product_delete', ['slug' => $slug]);
     \System\Session::flash('admin_success', 'Produk berhasil dihapus.');
 
     return redirect('admin/products');
@@ -1066,6 +1155,7 @@ Route::post('(:package)/management', function () {
         if ($uploadedPhoto) {
             admin_delete_management_photo($photoPath);
             $photoPath = $uploadedPhoto;
+            admin_audit('management_upload', ['path' => $photoPath]);
         }
     } catch (\Exception $e) {
         \System\Session::flash('admin_error', $e->getMessage());
@@ -1090,6 +1180,7 @@ Route::post('(:package)/management', function () {
     }
 
     \System\Session::flash('admin_success', 'Data pengurus berhasil disimpan.');
+    admin_audit('management_save', ['id' => $originalId ?: null]);
 
     return redirect('admin/management');
 });
@@ -1111,6 +1202,7 @@ Route::post('(:package)/management/delete', function () {
     }
 
     \System\Database::connection()->query('DELETE FROM management WHERE id = ?', [$id]);
+    admin_audit('management_delete', ['id' => $id]);
     \System\Session::flash('admin_success', 'Data pengurus berhasil dihapus.');
 
     return redirect('admin/management');
@@ -1179,7 +1271,9 @@ function admin_store_news_upload($key = 'file', $required = true)
     $storedExtension = null;
     $info = @getimagesize($tmp);
 
-    if ($info && isset($imageTypes[$extension]) && $imageTypes[$extension] === $info[2]) {
+    $mime = class_exists('finfo') ? (new \finfo(FILEINFO_MIME_TYPE))->file($tmp) : '';
+
+    if ($info && isset($imageTypes[$extension]) && $imageTypes[$extension] === $info[2] && in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], true)) {
         $type = 'image';
         $storedExtension = ($extension === 'jpeg') ? 'jpg' : $extension;
     } elseif ($extension === 'pdf') {
@@ -1393,6 +1487,7 @@ Route::post('(:package)/news/upload', function () {
 
     try {
         $file = admin_store_news_upload('file');
+        admin_audit('news_upload', ['type' => $file['type'], 'path' => $file['path']]);
 
         return \System\Response::json([
             'ok' => true,
@@ -1487,6 +1582,7 @@ Route::post('(:package)/news', function () {
         }
 
         \System\Session::flash('admin_success', 'Berita berhasil disimpan.');
+        admin_audit('news_save', ['id' => $originalId ?: null, 'published' => $isPublished]);
     } catch (\Throwable $e) {
         admin_log_news_error($e);
         \System\Session::flash('admin_error', 'Gagal menyimpan berita.'.(env('APP_DEBUG', false) ? ' '.$e->getMessage() : ' Periksa database dan skema tabel news.'));
@@ -1520,6 +1616,7 @@ Route::post('(:package)/news/delete', function () {
             admin_delete_news_upload($item->pdf_path);
         }
         \System\Database::connection()->query('DELETE FROM news WHERE slug = ?', [$slug]);
+        admin_audit('news_delete', ['slug' => $slug]);
         \System\Session::flash('admin_success', 'Berita berhasil dihapus.');
     } catch (\Throwable $e) {
         \System\Session::flash('admin_error', 'Gagal menghapus berita.');

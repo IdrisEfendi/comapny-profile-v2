@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ isset($title) ? $title.' - ' : '' }}Admin BPR Karawang</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @yield('head')
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
@@ -43,7 +43,10 @@
                     </span>
                 </a>
                 <a href="{{ url('admin/account') }}" class="{{ $base }} {{ $active === 'account' ? $on : '' }}">Akun Admin</a>
-                <a href="{{ url('admin/logout') }}" class="block rounded-2xl px-4 py-3 text-sm font-semibold text-red-200 hover:bg-red-500/20 hover:text-white">Logout</a>
+                <form action="{{ url('admin/logout') }}" method="post">
+                    @php echo csrf_field(); @endphp
+                    <button type="submit" class="block w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold text-red-200 hover:bg-red-500/20 hover:text-white">Logout</button>
+                </form>
             </nav>
         </aside>
 

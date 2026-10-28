@@ -4,6 +4,8 @@ module.exports = {
     './application/views/**/*.php',
     './application/views/**/*.blade.php',
     './application/controllers/**/*.php',
+    './packages/admin/views/**/*.php',
+    './packages/admin/**/*.php',
   ],
   theme: {
     extend: {
