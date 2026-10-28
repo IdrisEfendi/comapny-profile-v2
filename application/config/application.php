@@ -122,5 +122,5 @@ return [
     |
     */
 
-    'key' => env('APP_KEY', 'zjSWWqFFfUnfmw5GKJISpyLMYCao9eVV'),
+    'key' => env('APP_KEY', ''),
 ];

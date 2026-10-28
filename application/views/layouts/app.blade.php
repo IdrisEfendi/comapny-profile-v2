@@ -7,7 +7,7 @@
     $configuredUrl = rtrim((string) env('APP_URL', ''), '/');
     $pageUrl = $configuredUrl !== '' ? $configuredUrl.parse_url(\System\URL::current(), PHP_URL_PATH) : \System\URL::current();
     $ogType = isset($og_type) ? $og_type : 'website';
-    $ogImage = isset($og_image) && $og_image !== '' ? $og_image : (! empty($siteSettings['logo_path']) ? asset($siteSettings['logo_path']) : '');
+    $ogImage = isset($og_image) && $og_image !== '' ? $og_image : asset('og-company-profile.svg');
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -53,22 +53,6 @@
     </main>
 
     @include('partials.footer')
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
-    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (typeof AOS === 'undefined') {
-                return;
-            }
-
-            AOS.init({
-                duration: 700,
-                easing: 'ease-out-cubic',
-                once: true,
-                offset: 80,
-                disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-            });
-        });
-    </script>
+    <script src="{{ asset('js/scroll-reveal.js') }}" defer></script>
 </body>
 </html>

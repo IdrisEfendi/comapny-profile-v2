@@ -74,21 +74,25 @@
 
             <form class="mt-8 space-y-5" action="{{ url('kontak') }}" method="post">
                 @php echo csrf_field(); @endphp
+                <div class="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+                    <label for="website">Website</label>
+                    <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+                </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700" for="name">Nama</label>
-                    <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="name" name="name" type="text" placeholder="Nama lengkap" required>
+                    <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="name" name="name" type="text" maxlength="190" autocomplete="name" placeholder="Nama lengkap" required>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700" for="contact">Email / Telepon</label>
-                    <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="contact" name="contact" type="text" placeholder="email@domain.com / nomor telepon" required>
+                    <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="contact" name="contact" type="text" maxlength="190" autocomplete="email" placeholder="email@domain.com / nomor telepon" required>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700" for="subject">Subjek</label>
-                    <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="subject" name="subject" type="text" placeholder="Informasi produk">
+                    <input class="mt-2 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="subject" name="subject" type="text" maxlength="190" placeholder="Informasi produk">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700" for="message">Pesan</label>
-                    <textarea class="mt-2 min-h-32 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="message" name="message" placeholder="Tulis pesan Anda" required></textarea>
+                    <textarea class="mt-2 min-h-32 w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-100" id="message" name="message" maxlength="5000" placeholder="Tulis pesan Anda" required></textarea>
                 </div>
                 <button class="inline-flex w-full items-center justify-center rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-blue-950" type="submit">Kirim Pesan</button>
             </form>

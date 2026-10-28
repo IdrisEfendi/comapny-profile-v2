@@ -97,6 +97,11 @@ Route::post('kontak', function () {
         return redirect('kontak');
     }
 
+    if (trim((string) \System\Input::get('website')) !== '') {
+        \System\Session::flash('contact_success', 'Pesan berhasil dikirim.');
+        return redirect('kontak');
+    }
+
     $name = text_limit(\System\Input::get('name'), 190);
     $contact = text_limit(\System\Input::get('contact'), 190);
     $subject = text_limit(\System\Input::get('subject'), 190);
@@ -108,6 +113,16 @@ Route::post('kontak', function () {
 
     if ($name === '' || $contact === '' || $message === '') {
         \System\Session::flash('contact_error', 'Nama, email/telepon, dan pesan wajib diisi.');
+        return redirect('kontak');
+    }
+
+    if (mb_strlen($name) < 2 || mb_strlen($name) > 190 || mb_strlen($contact) < 5 || mb_strlen($contact) > 190 || mb_strlen($subject) > 190) {
+        \System\Session::flash('contact_error', 'Periksa kembali panjang data yang Anda masukkan.');
+        return redirect('kontak');
+    }
+
+    if (preg_match('/[\r\n]/', $name.$contact.$subject)) {
+        \System\Session::flash('contact_error', 'Data kontak tidak valid.');
         return redirect('kontak');
     }
 
@@ -183,4 +198,12 @@ Route::get('sitemap.xml', function () {
     $xml .= '</urlset>';
 
     return \System\Response::make($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+});
+
+Route::get('robots.txt', function () {
+    $request = \System\Request::foundation();
+    $base = $request->getScheme().'://'.$request->getHttpHost();
+    $robots = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /storage/\n\nSitemap: ".$base."/sitemap.xml\n";
+
+    return \System\Response::make($robots, 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
 });

@@ -16,6 +16,25 @@
   }
 }
 
+[data-aos] {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 700ms ease-out, transform 700ms ease-out;
+}
+
+[data-aos].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @layer components {
   .container-page {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;

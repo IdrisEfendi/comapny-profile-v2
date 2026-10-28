@@ -1,40 +1,73 @@
 # Company Profile V2
 
-## Deskripsi
-Aplikasi web **Company Profile** versi 2, menampilkan informasi perusahaan secara responsif dan modern. Dibangun dengan HTML, CSS, dan JavaScript vanilla, serta mendukung tema gelap, animasi halus, dan tipografi yang elegan.
+Website profil resmi PT BPR Karawang Jabar (Perseroda), dibangun dengan PHP Rakit, MySQL, Blade views, Tailwind CSS, dan JavaScript ringan.
 
-## Instalasi
-1. **Clone repository**
+## Kebutuhan
+
+- PHP 8.2+ dengan ekstensi `json`, `mbstring`, `openssl`, dan `pdo_mysql`
+- MySQL 8+
+- Composer
+- Node.js dan npm untuk build Tailwind CSS
+- Laragon atau Apache dengan `mod_rewrite`
+
+## Instalasi Laragon
+
+1. Clone project ke `C:\laragon\www\company-profile`.
+2. Buat database `db_cp` di MySQL.
+3. Import database:
    ```bash
-   git clone https://github.com/IdrisEfendi/company-profile-v2.git
-   cd company-profile-v2
+   mysql -u root -p db_cp < db_cp.sql
    ```
-2. **Instal dependensi** (jika ada)
-   - Proyek ini hanya menggunakan teknologi front‑end standar, jadi tidak memerlukan paket tambahan.
-3. **Sesuaikan lingkungan**
-   - Salin file contoh variabel lingkungan:
-     ```bash
-     cp .env.example .env
-     ```
-   - Edit `.env` sesuai kebutuhan Anda.
+4. Salin `.env.example` menjadi `.env`, lalu sesuaikan:
+   ```env
+   APP_ENV=local
+   APP_DEBUG=false
+   APP_URL=http://company-profile.test
+   APP_KEY=isi-dengan-key-acak-minimal-32-karakter
+   DB_DATABASE=db_cp
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+5. Install dependency dan build CSS:
+   ```bash
+   composer install
+   npm install
+   npm run build
+   ```
+6. Klik **Start All** di Laragon dan buka `http://company-profile.test`.
 
-## Menjalankan Aplikasi
-Buka file `index.html` di browser favorit atau gunakan server statis sederhana:
+Alternatif tanpa virtual host:
+
 ```bash
-python -m http.server 8000
-# lalu buka http://localhost:8000 di browser
+php -S localhost:8000
 ```
 
-## Teknologi yang Digunakan
-- **HTML5** – struktur semantic
-- **CSS3** – layout fleksibel, animasi, dan tema gelap
-- **JavaScript (ES6+)** – interaktivitas dan manipulasi DOM
+Buka `http://localhost:8000`.
 
-## Fitur Utama
-- Desain modern dengan warna harmonis dan tipografi Google Fonts (Inter)
-- Responsif untuk perangkat desktop, tablet, dan mobile
-- Tema gelap otomatis berdasarkan preferensi sistem
-- Animasi mikro untuk pengalaman pengguna yang hidup
+## Development
+
+Gunakan watcher Tailwind saat mengubah template:
+
+```bash
+npm run dev
+```
+
+Smoke test route publik:
+
+```bash
+php tests/smoke.php http://company-profile.test
+```
+
+Endpoint SEO tersedia di `/sitemap.xml` dan `/robots.txt`.
+
+## Production Checklist
+
+- Gunakan `APP_ENV=production` dan `APP_DEBUG=false`.
+- Gunakan `APP_KEY` unik minimal 32 karakter dan jangan commit `.env`.
+- Aktifkan HTTPS dan set `APP_SESSION_SECURE=true`.
+- Isi kredensial SMTP production, jangan gunakan `EMAIL_DRIVER=dummy`.
+- Pastikan folder `storage` tidak dapat diakses sebagai source atau executable.
+- Jalankan `npm run build` sebelum deploy.
 
 ## Kontribusi
 1. Fork repositori ini

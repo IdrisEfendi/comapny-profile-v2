@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">PT BPR Karawang Jabar (Perseroda)</title>
+  <desc id="desc">Mitra Keuangan Masyarakat Karawang</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#020617"/><stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1040" cy="100" r="260" fill="#2563eb" opacity=".2"/>
+  <circle cx="1100" cy="580" r="300" fill="#f59e0b" opacity=".12"/>
+  <rect x="90" y="94" width="9" height="442" rx="4" fill="#fbbf24"/>
+  <text x="145" y="185" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="5">PROFIL PERUSAHAAN</text>
+  <text x="145" y="300" fill="#ffffff" font-family="Arial, sans-serif" font-size="54" font-weight="800">PT BPR Karawang Jabar</text>
+  <text x="145" y="365" fill="#ffffff" font-family="Arial, sans-serif" font-size="54" font-weight="800">(Perseroda)</text>
+  <text x="145" y="445" fill="#fde68a" font-family="Arial, sans-serif" font-size="32" font-weight="600">Mitra Keuangan Masyarakat Karawang</text>
+</svg>
