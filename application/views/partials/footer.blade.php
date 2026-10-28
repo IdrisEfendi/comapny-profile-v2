@@ -22,7 +22,7 @@
         </div>
 
         <div>
-            <h3 class="font-semibold text-slate-950">Menu</h3>
+            <h2 class="font-semibold text-slate-950">Menu</h2>
             <ul class="mt-4 space-y-2 text-sm text-slate-600">
                 <li><a class="hover:text-blue-700" href="{{ url('tentang-kami') }}">Tentang Kami</a></li>
                 <li><a class="hover:text-blue-700" href="{{ url('produk-layanan') }}">Produk & Layanan</a></li>
@@ -33,7 +33,7 @@
         </div>
 
         <div>
-            <h3 class="font-semibold text-slate-950">Kontak</h3>
+            <h2 class="font-semibold text-slate-950">Kontak</h2>
             <ul class="mt-4 space-y-2 text-sm leading-6 text-slate-600">
                 <li>{{ $settings['address'] }}</li>
                 <li>{{ $settings['phone'] }}</li>

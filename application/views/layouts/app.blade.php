@@ -24,25 +24,36 @@
     <meta property="og:locale" content="id_ID">
     @if ($ogImage !== '')
         <meta property="og:image" content="{{ $ogImage }}">
-        <meta name="twitter:image" content="{{ $ogImage }}">
     @endif
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $pageTitle }}">
     <meta name="twitter:description" content="{{ $pageDescription }}">
+    @if ($ogImage !== '')
+        <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
     <link rel="icon" type="image/png" href="{{ $ogImage !== '' ? $ogImage : 'data:;base64,iVBORw0KGgo=' }}">
     <title>{{ $pageTitle }}</title>
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <style>
+        html:not(.js) [data-mobile-menu] { display: block; }
+        html:not(.js) [data-mobile-menu-button] { display: none; }
+    </style>
+    <script>document.documentElement.classList.add('js');</script>
     @yield('head')
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800">
     @include('partials.navbar')
 
-    <main>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-bold focus:text-slate-950 focus:shadow-lg">
+        Lewati ke konten utama
+    </a>
+
+    <main id="main-content">
         @yield('content')
     </main>
 
     @include('partials.footer')
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
     <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

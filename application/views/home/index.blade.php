@@ -52,6 +52,10 @@
     .hero-delay-4 { animation-delay: 460ms; }
     .hero-orb { animation: hero-orb-drift 9s ease-in-out infinite; }
 
+    .home-hero {
+        height: calc(100dvh - var(--site-header-height, 7rem));
+    }
+
     @media (prefers-reduced-motion: reduce) {
         .hero-fade-up {
             opacity: 1;
@@ -64,20 +68,20 @@
 @endsection
 
 @section('content')
-<section class="relative isolate overflow-hidden bg-slate-950">
+<section class="home-hero relative isolate overflow-hidden bg-slate-950">
     <div class="hero-orb absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-700/20 blur-3xl"></div>
     <div class="hero-orb absolute -bottom-56 right-0 h-[30rem] w-[30rem] rounded-full bg-blue-500/10 blur-3xl" style="animation-delay: -4s;"></div>
     <div class="absolute inset-0 bg-[linear-gradient(135deg,#020617_0%,#0f172a_62%,#172554_100%)]"></div>
-    <div class="relative mx-auto flex max-w-7xl items-center px-4 py-20 sm:px-6 sm:py-24 lg:min-h-[calc(100vh-7rem)] lg:px-8 lg:py-28">
+    <div class="relative mx-auto flex h-full max-w-7xl items-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
         <div>
             <div class="hero-fade-up hero-delay-1 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.22em] text-blue-200">
                 <span class="h-px w-8 bg-amber-300"></span>
                 <span>Profil Perusahaan</span>
             </div>
-            <p class="hero-fade-up hero-delay-2 mt-7 max-w-xl text-sm font-semibold text-blue-200">{{ $jsonLdSettings['company_name'] }}</p>
-            <h1 class="hero-fade-up hero-delay-2 mt-4 max-w-4xl text-5xl font-black leading-[1.04] tracking-[-0.035em] text-white sm:text-6xl lg:text-7xl">{{ $jsonLdSettings['tagline'] }}</h1>
-            <p class="hero-fade-up hero-delay-3 mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{{ $homeProfile['hero_intro'] }}</p>
-            <div class="hero-fade-up hero-delay-4 mt-10 flex flex-col gap-3 sm:flex-row">
+            <p class="hero-fade-up hero-delay-2 mt-5 max-w-xl text-sm font-semibold text-blue-200 sm:mt-7">{{ $jsonLdSettings['company_name'] }}</p>
+            <h1 class="hero-fade-up hero-delay-2 mt-3 max-w-4xl text-4xl font-black leading-[1.04] tracking-[-0.035em] text-white sm:mt-4 sm:text-6xl lg:text-7xl">{{ $jsonLdSettings['tagline'] }}</h1>
+            <p class="hero-fade-up hero-delay-3 mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:mt-7 sm:text-lg sm:leading-8">{{ $homeProfile['hero_intro'] }}</p>
+            <div class="hero-fade-up hero-delay-4 mt-7 flex flex-col gap-3 sm:mt-10 sm:flex-row">
                 <a href="{{ url('kontak') }}" class="inline-flex items-center justify-center rounded-2xl bg-amber-300 px-6 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-950/20 transition hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-200 focus:ring-offset-2 focus:ring-offset-slate-950">Hubungi Kami</a>
                 <a href="{{ url('produk-layanan') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-transparent px-6 py-3.5 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10">Jelajahi Produk</a>
             </div>

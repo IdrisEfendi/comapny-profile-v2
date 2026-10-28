@@ -35,7 +35,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-8 lg:grid-cols-3">
         <div class="space-y-8 lg:col-span-2">
             <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-900/10 sm:p-10">
-                <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{{ $item['title'] }}</h2>
+                <h2 class="sr-only">Isi berita</h2>
                 @if (! empty($item['image_path']))
                     <img src="{{ asset($item['image_path']) }}" alt="{{ $item['title'] }}" class="mt-6 w-full rounded-2xl border border-slate-200 object-cover">
                 @endif
