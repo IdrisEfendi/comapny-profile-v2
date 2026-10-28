@@ -13,28 +13,29 @@ Website profil resmi PT BPR Karawang Jabar (Perseroda), dibangun dengan PHP Raki
 ## Instalasi Laragon
 
 1. Clone project ke `C:\laragon\www\company-profile`.
-2. Buat database `db_cp` di MySQL.
-3. Import database:
-   ```bash
-   mysql -u root -p db_cp < db_cp.sql
-   ```
-4. Salin `.env.example` menjadi `.env`, lalu sesuaikan:
+2. Buat database kosong `db_cp` di MySQL.
+3. Salin `.env.example` menjadi `.env`, lalu sesuaikan:
    ```env
    APP_ENV=local
    APP_DEBUG=false
    APP_URL=http://company-profile.test
    APP_KEY=isi-dengan-key-acak-minimal-32-karakter
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=buat-password-admin-kuat
+   ADMIN_NAME=Administrator
    DB_DATABASE=db_cp
    DB_USERNAME=root
    DB_PASSWORD=
    ```
-5. Install dependency dan build CSS:
+4. Install dependency, jalankan migration, dan build CSS:
    ```bash
    composer install
+   php rakit migrate:install
+   php rakit migrate application
    npm install
    npm run build
    ```
-6. Klik **Start All** di Laragon dan buka `http://company-profile.test`.
+5. Klik **Start All** di Laragon dan buka `http://company-profile.test`.
 
 Alternatif tanpa virtual host:
 
@@ -58,7 +59,7 @@ Smoke test route publik:
 php tests/smoke.php http://company-profile.test
 ```
 
-Endpoint SEO tersedia di `/sitemap.xml` dan `/robots.txt`.
+Endpoint SEO tersedia di `/sitemap.xml` dan `/robots.txt`. Schema database dan default content dikelola melalui migration di `application/migrations/`.
 
 ## Production Checklist
 

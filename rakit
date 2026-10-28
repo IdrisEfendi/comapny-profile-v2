@@ -6,6 +6,10 @@
 // --------------------------------------------------------------
 define('RAKIT_START', microtime(true));
 
+// Rakit versi lama menghasilkan deprecation notice pada PHP 8.4.
+// Sembunyikan notice CLI agar output command tetap dapat digunakan.
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 // --------------------------------------------------------------
 // Definisikan konstanta untuk directory separator.
 // --------------------------------------------------------------
@@ -15,6 +19,17 @@ define('DS', DIRECTORY_SEPARATOR);
 // Include konstanta path milik framework.
 // --------------------------------------------------------------
 require 'paths.php';
+
+// Muat Composer dan environment yang sama dengan HTTP front controller.
+if (is_file($autoload = __DIR__.'/vendor/autoload.php')) {
+    require_once $autoload;
+
+    if (class_exists('Dotenv\\Dotenv')) {
+        Dotenv\Dotenv::createImmutable(__DIR__)->safeLoad();
+    }
+
+    unset($autoload);
+}
 
 // --------------------------------------------------------------
 // Bootstrap file core milik framework.
