@@ -41,5 +41,12 @@ Read the additional skill when the task matches its scope:
 - Release preparation, smoke checks, migrations, and rollback: `.agents/skills/rakit-release/SKILL.md`
 - Application architecture, boundaries, abstractions, and framework core decisions: `.agents/skills/rakit-architecture/SKILL.md`
 - Production incident diagnosis, mitigation, rollback, and postmortem: `.agents/skills/rakit-incident-response/SKILL.md`
+- Banner design for social media, ads, website heroes, and print: `.agents/skills/banner-design/SKILL.md`
+- Brand voice, visual identity, messaging, and consistency: `.agents/skills/brand/SKILL.md`
+- Design tokens, component specifications, and systematic design: `.agents/skills/design-system/SKILL.md`
+- End-to-end visual design including brand identity, logos, banners, icons, and presentations: `.agents/skills/design/SKILL.md`
+- Strategic HTML presentations and slides: `.agents/skills/slides/SKILL.md`
+- UI styling, responsive layouts, accessible components, and themes: `.agents/skills/ui-styling/SKILL.md`
+- UI/UX design, implementation, review, accessibility, and responsive interfaces: `.agents/skills/ui-ux-pro-max/SKILL.md`
 
 When a task spans multiple areas, read every applicable skill before editing. The shared skills supplement `rakit-project`; they do not replace it.
