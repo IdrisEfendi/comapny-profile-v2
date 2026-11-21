@@ -7,16 +7,16 @@
 @endphp
 
 @section('content')
-<section class="relative overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-slate-950 py-20 text-white sm:py-24">
-    <div class="absolute inset-0 bg-blue-900/20"></div>
+<section class="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-900 to-slate-950 py-20 text-white sm:py-24">
+    <div class="absolute inset-0 bg-brand-900/20"></div>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative grid gap-10 lg:grid-cols-2 lg:items-end">
         <div>
-            <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Pengurus</p>
+            <p class="text-sm font-bold uppercase tracking-widest text-brand-100">Pengurus</p>
             <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl">Direksi dan Komisaris {{ $settings['company_name'] }}</h1>
             <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Informasi pengurus ditampilkan dari database untuk mendukung transparansi profil {{ $settings['company_name'] }}.</p>
         </div>
         <div class="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
-            <p class="text-sm font-semibold text-blue-100">Komposisi Pengurus</p>
+            <p class="text-sm font-semibold text-brand-100">Komposisi Pengurus</p>
             <div class="mt-5 grid grid-cols-2 gap-4">
                 <div class="rounded-2xl bg-white/10 p-4"><p class="text-3xl font-bold">{{ count($directors) }}</p><p class="text-sm text-slate-300">Direksi</p></div>
                 <div class="rounded-2xl bg-white/10 p-4"><p class="text-3xl font-bold">{{ count($commissioners) }}</p><p class="text-sm text-slate-300">Komisaris</p></div>
@@ -28,7 +28,7 @@
 <section class="py-20 sm:py-24" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-            <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Direksi</p>
+            <p class="text-sm font-bold uppercase tracking-widest text-brand-700">Direksi</p>
             <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">Pengelola Operasional Perusahaan</h2>
             <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600 mx-auto">Informasi berikut disusun untuk memperjelas struktur pengurus perusahaan kepada pengunjung website.</p>
         </div>
@@ -38,19 +38,19 @@
                 <div class="md:col-span-2 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
                     <h3 class="text-xl font-bold text-slate-950">Data direksi belum tersedia</h3>
                     <p class="mt-3 leading-7 text-slate-600">Informasi direksi akan ditampilkan setelah dimasukkan melalui panel admin.</p>
-                    <a href="{{ url('kontak') }}" class="mt-6 inline-flex rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white hover:bg-blue-950">Hubungi Kami</a>
+                    <a href="{{ url('kontak') }}" class="mt-6 inline-flex rounded-full bg-brand-800 px-6 py-3 text-sm font-bold text-white hover:bg-brand-900">Hubungi Kami</a>
                 </div>
             @else
                 @foreach ($directors as $index => $person)
                 <article class="rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 overflow-hidden">
-                    <div class="{{ $index % 2 === 0 ? 'bg-gradient-to-br from-blue-900 to-blue-700' : 'bg-gradient-to-br from-slate-900 to-blue-800' }} p-8 text-white">
+                    <div class="{{ $index % 2 === 0 ? 'bg-gradient-to-br from-brand-900 to-brand-700' : 'bg-gradient-to-br from-slate-900 to-brand-800' }} p-8 text-white">
                         @if (! empty($person['photo_path']))
                             <img src="{{ asset($person['photo_path']) }}" alt="Foto {{ $person['name'] }}" class="h-24 w-24 rounded-full border-4 border-white/30 object-cover shadow-lg">
                         @else
-                            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-800">{{ $person['initials'] }}</div>
+                            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-brand-800">{{ $person['initials'] }}</div>
                         @endif
                         <h3 class="mt-6 text-2xl font-bold">{{ $person['name'] }}</h3>
-                        <p class="mt-2 text-blue-100">{{ $person['position'] }}</p>
+                        <p class="mt-2 text-brand-100">{{ $person['position'] }}</p>
                     </div>
                     <div class="p-8">
                         <p class="leading-7 text-slate-600">{{ $person['bio'] }}</p>
@@ -69,7 +69,7 @@
 <section class="bg-white py-20 sm:py-24" data-aos="fade-up">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-            <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Komisaris</p>
+            <p class="text-sm font-bold uppercase tracking-widest text-brand-700">Komisaris</p>
             <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">Fungsi Pengawasan Perusahaan</h2>
             <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600 mx-auto">Bagian komisaris disajikan untuk memperjelas struktur pengawasan dalam profil perusahaan.</p>
         </div>
@@ -79,7 +79,7 @@
                 <div class="md:col-span-2 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
                     <h3 class="text-xl font-bold text-slate-950">Data komisaris belum tersedia</h3>
                     <p class="mt-3 leading-7 text-slate-600">Informasi komisaris akan ditampilkan setelah dimasukkan melalui panel admin.</p>
-                    <a href="{{ url('kontak') }}" class="mt-6 inline-flex rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white hover:bg-blue-950">Hubungi Kami</a>
+                    <a href="{{ url('kontak') }}" class="mt-6 inline-flex rounded-full bg-brand-800 px-6 py-3 text-sm font-bold text-white hover:bg-brand-900">Hubungi Kami</a>
                 </div>
             @else
                 @foreach ($commissioners as $person)
@@ -92,7 +92,7 @@
                         @endif
                         <div>
                             <h3 class="text-xl font-bold text-slate-950">{{ $person['name'] }}</h3>
-                            <p class="mt-1 text-sm font-semibold text-blue-700">{{ $person['position'] }}</p>
+                            <p class="mt-1 text-sm font-semibold text-brand-700">{{ $person['position'] }}</p>
                             <p class="mt-4 leading-7 text-slate-600">{{ $person['bio'] }}</p>
                         </div>
                     </div>
@@ -106,7 +106,7 @@
 <section class="py-20 sm:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-8 lg:grid-cols-2 lg:items-center">
         <div>
-            <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Akurasi Data</p>
+            <p class="text-sm font-bold uppercase tracking-widest text-brand-700">Akurasi Data</p>
             <h2 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl mt-3">Data pengurus perlu dijaga tetap akurat</h2>
             <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">Informasi nama, gelar, dan jabatan pengurus perlu dijaga akurat agar profil perusahaan tetap terpercaya.</p>
         </div>
@@ -118,14 +118,14 @@
     </div>
 </section>
 
-<section class="bg-blue-900 py-16 text-white sm:py-20">
+<section class="bg-brand-900 py-16 text-white sm:py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
-            <p class="text-sm font-bold uppercase tracking-widest text-blue-200">Butuh Informasi Resmi?</p>
+            <p class="text-sm font-bold uppercase tracking-widest text-brand-100">Butuh Informasi Resmi?</p>
             <h2 class="mt-3 text-3xl font-bold tracking-tight">Hubungi {{ $settings['company_name'] }}</h2>
-            <p class="mt-3 max-w-2xl text-blue-100">Untuk konfirmasi struktur pengurus atau informasi perusahaan, gunakan kanal kontak resmi.</p>
+            <p class="mt-3 max-w-2xl text-brand-100">Untuk konfirmasi struktur pengurus atau informasi perusahaan, gunakan kanal kontak resmi.</p>
         </div>
-        <a href="{{ url('kontak') }}" class="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-900 hover:bg-blue-50">Ke Halaman Kontak</a>
+        <a href="{{ url('kontak') }}" class="inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-900 hover:bg-brand-50">Ke Halaman Kontak</a>
     </div>
 </section>
 @endsection

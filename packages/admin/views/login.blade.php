@@ -4,28 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk Admin - BPR Karawang Jabar</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
-        .admin-login-page { background: #f5f4ef; color: #172b31; }
-        .admin-login-layout { display: grid; min-height: 100vh; }
-        .admin-login-brand { position: relative; isolation: isolate; display: flex; min-height: 320px; flex-direction: column; justify-content: space-between; overflow: hidden; background: #102b35; padding: 2rem 1.75rem; color: #fff; }
-        .admin-login-brand:before, .admin-login-brand:after { position: absolute; z-index: -1; content: ""; border: 1px solid rgba(255,255,255,.1); border-radius: 9999px; }
-        .admin-login-brand:before { top: -10rem; right: -8rem; width: 32rem; height: 32rem; }
-        .admin-login-brand:after { top: -6rem; right: -4rem; width: 24rem; height: 24rem; }
-        .admin-login-orb { position: absolute; z-index: -1; bottom: -12rem; left: -5rem; width: 30rem; height: 30rem; border-radius: 9999px; background: rgba(214,166,75,.1); filter: blur(48px); }
-        .admin-login-content { display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; }
-        .admin-login-form { width: 100%; max-width: 28rem; }
-        .admin-login-input:focus { border-color: #1d5960; box-shadow: 0 0 0 4px rgba(29,89,96,.1); }
-        .admin-login-button:focus-visible, .admin-login-brand a:focus-visible { outline: 3px solid #f0c66f; outline-offset: 4px; }
-        @media (min-width: 640px) { .admin-login-brand { padding: 2.5rem 3rem; } .admin-login-content { padding-right: 3rem; padding-left: 3rem; } }
-        @media (min-width: 1024px) { .admin-login-layout { grid-template-columns: 1.05fr .95fr; } .admin-login-brand { min-height: 100vh; padding: 3.5rem 4rem; } .admin-login-content { padding-right: 4rem; padding-left: 4rem; } }
-        @media (prefers-reduced-motion: reduce) { .admin-login-page *, .admin-login-page *:before, .admin-login-page *:after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: '#102b35',
+                        forest: '#173f46',
+                        gold: '#f0c66f',
+                        paper: '#f5f4ef'
+                    }
+                }
+            }
+        };
+    </script>
 </head>
-<body class="admin-login-page min-h-screen font-sans text-slate-900 antialiased">
-    <main class="admin-login-layout">
-        <section class="admin-login-brand">
-            <div class="admin-login-orb" aria-hidden="true"></div>
+<body class="min-h-screen bg-paper font-sans text-slate-900 antialiased">
+    <main class="grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
+        <section class="relative isolate flex min-h-[320px] flex-col justify-between overflow-hidden bg-ink px-7 py-8 text-white sm:px-12 sm:py-10 lg:min-h-screen lg:px-16 lg:py-14">
+            <div aria-hidden="true" class="absolute -right-32 -top-40 -z-10 h-[32rem] w-[32rem] rounded-full border border-white/10"></div>
+            <div aria-hidden="true" class="absolute -right-16 -top-24 -z-10 h-[24rem] w-[24rem] rounded-full border border-white/10"></div>
+            <div aria-hidden="true" class="absolute -bottom-48 -left-20 -z-10 h-[30rem] w-[30rem] rounded-full bg-gold/10 blur-3xl"></div>
 
             <a class="inline-flex w-fit items-center gap-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#102b35]" href="{{ url('/') }}" aria-label="BPR Karawang Jabar, kembali ke halaman utama">
                 <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-sm font-black tracking-wide text-[#f0c66f]">BPR</span>
@@ -33,8 +33,8 @@
             </a>
 
             <div class="max-w-xl py-10 lg:py-0">
-                <p class="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#f0c66f]"><span class="h-px w-8 bg-[#f0c66f]"></span>Portal pengelolaan</p>
-                <h1 class="max-w-lg text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl">Melayani Karawang, <span class="font-serif italic font-normal text-[#f0c66f]">bertumbuh</span> bersama.</h1>
+                <p class="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-gold"><span class="h-px w-8 bg-gold"></span>Portal pengelolaan</p>
+                <h1 class="max-w-lg text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl">Melayani Karawang, <span class="font-serif italic font-normal text-gold">bertumbuh</span> bersama.</h1>
                 <p class="mt-6 max-w-md text-sm leading-7 text-white/70 sm:text-base">Kelola informasi dan cerita perusahaan melalui satu ruang kerja yang aman.</p>
             </div>
 
@@ -44,8 +44,8 @@
             </div>
         </section>
 
-        <section class="admin-login-content">
-            <div class="admin-login-form">
+        <section class="flex items-center justify-center px-6 py-12 sm:px-12 lg:px-16">
+            <div class="w-full max-w-md">
                 <div class="mb-10">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#9a742b]">Akses administrator</p>
                     <h2 class="mt-3 text-3xl font-semibold tracking-tight text-[#172b31] sm:text-4xl">Selamat datang</h2>
@@ -61,15 +61,15 @@
 
                 <form action="{{ url('admin/login') }}" method="post" class="space-y-5">
                     @php echo csrf_field(); @endphp
-                    <div>
+                    <div class="space-y-1">
                         <label class="mb-2 block text-sm font-semibold text-[#263c41]" for="username">Username</label>
-                        <input class="admin-login-input w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400" id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Masukkan username" required>
+                        <input class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-forest focus:ring-4 focus:ring-forest/10" id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Masukkan username" required>
                     </div>
-                    <div>
+                    <div class="space-y-1">
                         <label class="mb-2 block text-sm font-semibold text-[#263c41]" for="password">Password</label>
-                        <input class="admin-login-input w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400" id="password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
+                        <input class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-forest focus:ring-4 focus:ring-forest/10" id="password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
                     </div>
-                    <button class="admin-login-button group mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-800 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-900 focus:outline-none active:translate-y-px" type="submit">
+                    <button class="group mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-forest/20 transition hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-forest/25 active:translate-y-px" type="submit">
                         Masuk ke dashboard
                         <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.69L10.22 5.03a.75.75 0 1 1 1.06-1.06l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 0 1-1.06-1.06l4.22-4.22H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
                     </button>

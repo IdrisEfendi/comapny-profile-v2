@@ -33,7 +33,28 @@
     @endif
     <link rel="icon" type="image/png" href="{{ $ogImage !== '' ? $ogImage : 'data:;base64,iVBORw0KGgo=' }}">
     <title>{{ $pageTitle }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#edf3ef',
+                            100: '#d9e6df',
+                            500: '#47776b',
+                            600: '#34665d',
+                            700: '#28544c',
+                            800: '#173f46',
+                            900: '#102b35'
+                        },
+                        accent: { 500: '#d6a64b', 600: '#9a742b' }
+                    },
+                    boxShadow: { soft: '0 18px 45px rgba(15, 23, 42, 0.08)' }
+                }
+            }
+        };
+    </script>
     <style>
         html:not(.js) [data-mobile-menu] { display: block; }
         html:not(.js) [data-mobile-menu-button] { display: none; }
@@ -41,7 +62,7 @@
     <script>document.documentElement.classList.add('js');</script>
     @yield('head')
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
+<body class="min-h-screen bg-[#f5f4ef] text-slate-800 antialiased">
     @include('partials.navbar')
 
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-bold focus:text-slate-950 focus:shadow-lg">

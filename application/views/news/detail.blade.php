@@ -10,14 +10,14 @@
 @endphp
 
 @section('content')
-<section class="relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-blue-50 py-20 sm:py-24">
+<section class="relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-brand-50 py-20 sm:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-2 lg:items-center">
         <div>
-            <p class="text-sm font-bold uppercase tracking-widest text-blue-700">Berita & Pengumuman</p>
+            <p class="text-sm font-bold uppercase tracking-widest text-brand-700">Berita & Pengumuman</p>
             <h1 class="mt-5 max-w-4xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">{{ $item['title'] }}</h1>
             <div class="mt-6 flex flex-wrap items-center gap-3">
                 @if ($item['category'] !== '')
-                    <span class="rounded-full bg-blue-800 px-3 py-1 text-xs font-semibold text-white">{{ $item['category'] }}</span>
+                    <span class="rounded-full bg-brand-800 px-3 py-1 text-xs font-semibold text-white">{{ $item['category'] }}</span>
                 @endif
                 @if ($date !== '')
                     <span class="text-sm font-semibold text-slate-500">{{ $date }}</span>
@@ -26,7 +26,7 @@
             @if ($item['summary'] !== '')
                 <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-600">{{ $item['summary'] }}</p>
             @endif
-            <a href="{{ url('berita') }}" class="mt-8 inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:border-blue-700 hover:text-blue-800">Kembali ke Berita</a>
+            <a href="{{ url('berita') }}" class="mt-8 inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:border-brand-700 hover:text-brand-800">Kembali ke Berita</a>
         </div>
     </div>
 </section>
@@ -43,16 +43,16 @@
                     $body = trim((string) $item['content']);
                     $bodyIsHtml = $body !== strip_tags($body);
                 @endphp
-                <div class="mt-6 leading-8 text-slate-700 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-lg [&_h3]:font-bold [&_a]:font-semibold [&_a]:text-blue-700 [&_a]:underline [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-blue-200 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-slate-200">{!! $bodyIsHtml ? $body : nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8')) !!}</div>
+                <div class="mt-6 leading-8 text-slate-700 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mb-2 [&_h3]:mt-5 [&_h3]:text-lg [&_h3]:font-bold [&_a]:font-semibold [&_a]:text-brand-700 [&_a]:underline [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-brand-100 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-slate-200">{!! $bodyIsHtml ? $body : nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8')) !!}</div>
                 @if (! empty($item['pdf_path']))
                     <a href="{{ asset($item['pdf_path']) }}" target="_blank" rel="noopener" class="mt-8 inline-flex rounded-full bg-red-600 px-6 py-3 text-sm font-bold text-white hover:bg-red-700">Unduh Lampiran PDF</a>
                 @endif
             </article>
 
-            <div class="rounded-3xl border border-blue-100 bg-blue-50 p-6">
+            <div class="rounded-3xl border border-brand-100 bg-brand-50 p-6">
                 <h3 class="text-xl font-bold text-slate-950">Butuh informasi lebih lanjut?</h3>
                 <p class="mt-3 text-sm leading-6 text-slate-600">Hubungi {{ $settings['company_name'] }} melalui kanal kontak resmi untuk mendapatkan informasi terbaru dan akurat.</p>
-                <a href="{{ url('kontak') }}" class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-blue-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-blue-950">Hubungi Kami</a>
+                <a href="{{ url('kontak') }}" class="mt-6 inline-flex w-full items-center justify-center rounded-full bg-brand-800 px-6 py-3 text-sm font-bold text-white shadow-lg hover:bg-brand-900">Hubungi Kami</a>
             </div>
         </div>
 
@@ -65,9 +65,9 @@
                     <ul class="mt-5 space-y-4">
                         @foreach ($otherNews as $other)
                             <li>
-                                <a href="{{ url('berita/'.$other['slug']) }}" class="block rounded-2xl bg-slate-50 p-4 transition hover:bg-blue-50">
+                                <a href="{{ url('berita/'.$other['slug']) }}" class="block rounded-2xl bg-slate-50 p-4 transition hover:bg-brand-50">
                                     @if ($other['category'] !== '')
-                                        <span class="text-xs font-semibold text-blue-700">{{ $other['category'] }}</span>
+                                        <span class="text-xs font-semibold text-brand-700">{{ $other['category'] }}</span>
                                     @endif
                                     <p class="mt-1 font-bold leading-snug text-slate-950">{{ $other['title'] }}</p>
                                     @if (public_format_date($other['published_at']) !== '')

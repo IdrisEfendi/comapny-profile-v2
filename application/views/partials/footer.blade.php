@@ -9,7 +9,7 @@
                 @if (! empty($settings['logo_path']))
                     <img src="{{ asset($settings['logo_path']) }}" alt="Logo {{ $settings['company_name'] }}" class="h-11 w-11 rounded-2xl bg-white object-contain p-1 shadow-sm">
                 @else
-                    <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-700 text-sm font-bold text-white">BPR</span>
+                    <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#173f46] text-sm font-black tracking-wide text-[#f0c66f]">BPR</span>
                 @endif
                 <div>
                     <p class="font-bold text-slate-950">{{ $settings['company_name'] }}</p>
@@ -24,11 +24,11 @@
         <div>
             <h2 class="font-semibold text-slate-950">Menu</h2>
             <ul class="mt-4 space-y-2 text-sm text-slate-600">
-                <li><a class="hover:text-blue-700" href="{{ url('tentang-kami') }}">Tentang Kami</a></li>
-                <li><a class="hover:text-blue-700" href="{{ url('produk-layanan') }}">Produk & Layanan</a></li>
-                <li><a class="hover:text-blue-700" href="{{ url('pengurus') }}">Pengurus</a></li>
-                <li><a class="hover:text-blue-700" href="{{ url('berita') }}">Berita</a></li>
-                <li><a class="hover:text-blue-700" href="{{ url('kontak') }}">Kontak</a></li>
+                <li><a class="transition hover:text-[#28544c]" href="{{ url('tentang-kami') }}">Tentang Kami</a></li>
+                <li><a class="transition hover:text-[#28544c]" href="{{ url('produk-layanan') }}">Produk & Layanan</a></li>
+                <li><a class="transition hover:text-[#28544c]" href="{{ url('pengurus') }}">Pengurus</a></li>
+                <li><a class="transition hover:text-[#28544c]" href="{{ url('berita') }}">Berita</a></li>
+                <li><a class="transition hover:text-[#28544c]" href="{{ url('kontak') }}">Kontak</a></li>
             </ul>
         </div>
 
